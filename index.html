@@ -7,8 +7,9 @@
 <meta name="theme-color" content="#121311" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Gastos">
-<title>Gastos · Entrada</title>
+<title>Gastos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -35,10 +36,10 @@ html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.45 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none}
-.num{font-variant-numeric:tabular-nums}
+a{color:inherit;text-decoration:none}
 
 #app{max-width:520px;margin:0 auto;padding:0 16px calc(96px + env(safe-area-inset-bottom));min-height:100dvh}
-body[data-tab="add"] #app{padding-bottom:calc(168px + env(safe-area-inset-bottom))}
+body[data-bar="1"] #app{padding-bottom:calc(168px + env(safe-area-inset-bottom))}
 
 /* Cabecera */
 .top{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 0 12px}
@@ -46,26 +47,26 @@ body[data-tab="add"] #app{padding-bottom:calc(168px + env(safe-area-inset-bottom
 h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .who{position:relative}
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:16px;display:grid;place-items:center}
-.menu{position:absolute;right:0;top:48px;min-width:220px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.14);padding:8px;z-index:30}
+.menu{position:absolute;right:0;top:48px;min-width:230px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);box-shadow:0 10px 30px rgba(0,0,0,.14);padding:8px;z-index:30}
 .menu .em{font-size:13px;color:var(--muted);padding:6px 8px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;word-break:break-all}
-.menu button{width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700}
-.menu button:hover{background:var(--surface-2)}
+.menu button,.menu a{display:block;width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700}
+.menu button:hover,.menu a:hover{background:var(--surface-2)}
 
-.demo{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.4;background:color-mix(in srgb,var(--warn) 12%,var(--surface));color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);padding:10px 12px;border-radius:var(--r-sm);margin-bottom:6px}
+.demo{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.4;background:color-mix(in srgb,var(--warn) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);padding:10px 12px;border-radius:var(--r-sm);margin-bottom:6px}
 .demo b{color:var(--warn)}
 
 /* Controles */
 .seg{display:flex;background:var(--surface-2);border-radius:13px;padding:4px;gap:4px}
 .seg button{flex:1;padding:9px 8px;border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);white-space:nowrap;transition:background .15s,color .15s}
 .seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
 #tipoSeg button.on[data-v="gasto"]{color:var(--gasto)}
 #tipoSeg button.on[data-v="ingreso"]{color:var(--ingreso)}
-.seg.wrap{flex-wrap:wrap}
-.seg.wrap button{flex:1 1 30%}
 
 .lbl{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:22px 2px 10px}
+.intro{text-align:center;font-size:13.5px;color:var(--muted);margin-top:12px}
 
-.amount{display:flex;align-items:baseline;justify-content:center;gap:6px;padding:26px 0 6px}
+.amount{display:flex;align-items:baseline;justify-content:center;gap:6px;padding:22px 0 6px}
 .amount input{width:4.5ch;min-width:3ch;max-width:100%;border:0;background:none;text-align:right;font-size:52px;font-weight:800;letter-spacing:-.035em;outline:none;font-variant-numeric:tabular-nums;caret-color:var(--accent)}
 .amount input::placeholder{color:var(--line)}
 .amount span{font-size:30px;font-weight:700;color:var(--muted)}
@@ -80,16 +81,18 @@ input.pill{max-width:150px}
 .cat .ic{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:color-mix(in srgb,var(--c) 15%,transparent)}
 .cat.on{border-color:var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 9%,var(--surface))}
 
-.field{display:block;width:100%;padding:13px 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);outline:none;font-size:15px}
+.field{display:block;width:100%;padding:13px 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);outline:none;font-size:16px}
 .field:focus{border-color:var(--accent)}
 select.field{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 19px) 50%,calc(100% - 14px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:36px}
-.mt{margin-top:10px}
+.fl{font-size:12px;font-weight:700;color:var(--muted);margin:16px 2px 5px;display:block}
+.mt{margin-top:10px}.mt2{margin-top:14px}
 
 .card{background:var(--surface);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.row .t{font-weight:700}
+.t{font-weight:700}
 .hint{font-size:13px;color:var(--muted);margin-top:8px}
 .hint:empty{display:none}
+.hint button{font-weight:700;color:var(--accent)}
 
 .switch{position:relative;width:48px;height:29px;flex:none}
 .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;z-index:1}
@@ -103,26 +106,41 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .reparto input[type=range]{width:100%;accent-color:var(--accent)}
 .legend{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);margin-top:4px}
 .legend b{color:var(--ink)}
-.presets{display:flex;gap:6px;margin-top:10px}
+.presets{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .presets button{padding:6px 11px;border-radius:99px;font-size:12.5px;font-weight:700;background:var(--surface-2);color:var(--muted)}
+.presets button.on{background:var(--accent-soft);color:var(--accent)}
 .presets button:disabled{opacity:.45;cursor:not-allowed}
+
+/* Partes de una aportación */
+.parts{margin-top:12px;border-top:1px solid var(--line)}
+.part{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.part:last-child{border-bottom:0}
+.part .n{font-weight:700}
+.part .n small{font-weight:600;color:var(--muted);margin-left:4px}
+.part .v{font-weight:800;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.part .s{display:block;font-size:12px;color:var(--muted);font-weight:600}
 
 .savebar{position:fixed;left:0;right:0;bottom:calc(66px + env(safe-area-inset-bottom));z-index:15;padding:14px 16px 10px;background:linear-gradient(to bottom,transparent,var(--bg) 35%)}
 .primary{display:block;width:100%;max-width:488px;margin:0 auto;padding:16px;border-radius:15px;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:16px;letter-spacing:-.01em;transition:transform .1s,opacity .15s}
 .primary:active{transform:scale(.985)}
 .primary:disabled{opacity:.55}
+.ghost{padding:9px 14px;border-radius:11px;font-weight:700;font-size:14px;color:var(--ink);background:var(--surface-2)}
+.small{padding:8px 13px;border-radius:10px;font-weight:800;font-size:13.5px;background:var(--accent);color:var(--on-accent)}
+.danger{padding:8px 13px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--gasto);background:color-mix(in srgb,var(--gasto) 11%,transparent)}
+.linkbtn{font-weight:700;color:var(--accent);font-size:14px;padding:12px 0;display:block;margin:0 auto}
 
 /* Pestañas */
 .tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
 .tabs .inner{display:flex;max-width:520px;margin:0 auto}
-.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11.5px;font-weight:700;color:var(--muted)}
+.tabs button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font-size:11.5px;font-weight:700;color:var(--muted)}
 .tabs button.on{color:var(--accent)}
 .tabs svg{width:23px;height:23px}
+.tabs .dot{position:absolute;top:4px;left:calc(50% + 8px);width:9px;height:9px;border-radius:50%;background:var(--gasto);border:2px solid var(--surface)}
 
 /* Lista */
 .monthnav{display:flex;align-items:center;justify-content:space-between;background:var(--surface);border-radius:14px;padding:6px;box-shadow:var(--shadow)}
 .monthnav button{width:40px;height:36px;border-radius:10px;font-size:20px;font-weight:700;color:var(--muted)}
-.monthnav button:hover{background:var(--surface-2)}
+.monthnav button:disabled{opacity:.3}
 .monthnav strong{font-size:15.5px}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
 .stat{background:var(--surface);border-radius:14px;padding:11px 12px;box-shadow:var(--shadow);min-width:0}
@@ -131,64 +149,63 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .balance{margin-top:10px;display:flex;gap:12px;align-items:center;background:var(--accent-soft);border-radius:14px;padding:12px 14px}
 .balance .big{font-weight:800}
 .balance .sm{font-size:12.5px;color:var(--muted)}
-.balance .dot{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:16px;flex:none}
+.balance .bdot{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:16px;flex:none}
+.scope{font-size:12.5px;color:var(--muted);text-align:center;margin-top:10px}
 .day{display:flex;justify-content:space-between;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:20px 4px 8px}
 .items{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .iw+.iw{border-top:1px solid var(--line)}
 .item{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;text-align:left}
 .item .ic{--c:#888;width:40px;height:40px;flex:none;border-radius:13px;display:grid;place-items:center;font-size:19px;background:color-mix(in srgb,var(--c) 15%,transparent)}
 .item .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.item .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .s{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
-.badge{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.badge{font-size:10.5px;font-weight:800;padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.badge.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
 .amt{font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
 .amt.ingreso{color:var(--ingreso)}
 .acts{display:flex;justify-content:flex-end;gap:8px;padding:0 14px 12px}
-.danger{padding:8px 13px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--gasto);background:color-mix(in srgb,var(--gasto) 11%,transparent)}
-.ghost{padding:8px 13px;border-radius:10px;font-weight:700;font-size:13.5px;color:var(--muted);background:var(--surface-2)}
-.empty{text-align:center;color:var(--muted);padding:40px 10px;font-size:14px}
+.empty{text-align:center;color:var(--muted);padding:34px 10px;font-size:14px}
 
-/* Importar */
-.drop{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:26px 16px;border:1.5px dashed var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer}
-.drop:hover{border-color:var(--accent)}
-.drop svg{width:30px;height:30px;color:var(--accent)}
-.drop .t{font-weight:800}
-.drop .s{font-size:13px;color:var(--muted)}
-.linkbtn{font-weight:700;color:var(--accent);font-size:14px;padding:10px 0;display:block;margin:0 auto}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.fl{font-size:12px;font-weight:700;color:var(--muted);margin:0 2px 5px;display:block}
-.map{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.map select{padding:10px 30px 10px 10px;font-size:13.5px}
-.chkrow{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--muted);margin-top:10px}
-.chkrow input{width:18px;height:18px;accent-color:var(--accent)}
-.summary{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin:16px 4px 8px}
-.summary b{color:var(--ink)}
-.prow{display:flex;gap:10px;align-items:flex-start;padding:11px 12px}
-.prow+.prow{border-top:1px solid var(--line)}
-.prow.off{opacity:.45}
-.prow>input{width:18px;height:18px;margin-top:3px;accent-color:var(--accent);flex:none}
-.pmain{flex:1;min-width:0}
-.pt{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ps{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:5px;font-size:12.5px;color:var(--muted)}
-.mini{padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--surface-2);font-size:12.5px;font-weight:600;max-width:170px}
-.mini.warn{border-color:var(--warn);color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--surface))}
-.minisw{display:inline-flex;align-items:center;gap:4px;font-weight:600}
-.minisw input{width:15px;height:15px;accent-color:var(--accent)}
+/* Aportaciones */
+.apc{background:var(--surface);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow)}
+.apc+.apc{margin-top:10px}
+.apc .s{font-size:12.5px;color:var(--muted)}
+.aprow{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.aprow:first-of-type{margin-top:10px}
+.aprow .ok{color:var(--ingreso);font-weight:700}
+.aprow .pend{color:var(--warn);font-weight:700}
+.apacts{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
 
 /* Login */
-.login{margin-top:12vh}
+.login{margin-top:10vh}
 .login h2{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
 .login p{color:var(--muted);margin-bottom:18px}
+.code{text-align:center;font-size:26px;font-weight:800;letter-spacing:.3em;font-variant-numeric:tabular-nums}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(10,10,8,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+@media (min-width:600px){.modal{align-items:center}}
+.sheet{width:100%;max-width:440px;background:var(--surface);border-radius:22px;padding:20px 18px 16px;box-shadow:0 20px 50px rgba(0,0,0,.3);max-height:calc(100dvh - 32px);overflow:auto}
+.sheet .mh{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.sheet .mp{color:var(--muted);margin-top:6px;font-size:14px}
+.sheet .mp b{color:var(--ink)}
+.sheet .mbig{font-size:34px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:12px}
+.sheet .inp{position:relative}
+.sheet .inp input{padding-right:34px;font-variant-numeric:tabular-nums;font-weight:700}
+.sheet .inp i{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted)}
+.sheet .mbtns{display:flex;flex-direction:column;gap:8px;margin-top:18px}
+.sheet .mbtns .primary{padding:15px}
+.sheet .mbtns .ghost{padding:13px}
 
 /* Toast */
-.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:700;font-size:14px;max-width:calc(100% - 32px);text-align:center;transition:opacity .2s,transform .2s;z-index:50}
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:700;font-size:14px;max-width:calc(100% - 32px);text-align:center;transition:opacity .2s,transform .2s;z-index:80}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.err{background:var(--gasto);color:#fff}
 
-@media (max-width:360px){ .cats{grid-template-columns:repeat(3,1fr)} .map{grid-template-columns:1fr} }
+@media (max-width:360px){ .cats{grid-template-columns:repeat(3,1fr)} }
 </style>
 </head>
-<body data-tab="add">
+<body>
 <div id="app">
   <header class="top">
     <div>
@@ -199,6 +216,8 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
       <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
       <div class="menu" id="menu" hidden>
         <div class="em" id="menuEmail"></div>
+        <button id="menuIngresos">Mis ingresos</button>
+        <a href="reporting.html">Ver informe</a>
         <button id="logout">Cerrar sesión</button>
       </div>
     </div>
@@ -206,15 +225,24 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 
   <div class="demo" id="demoBanner" hidden>
     <span>🧪</span>
-    <span><b>Modo demo.</b> Los datos viven solo en esta pestaña. Rellena <code>CONFIG</code> con la URL y la anon key de tu proyecto para guardar en Supabase.</span>
+    <span><b>Modo demo.</b> Los datos viven solo en esta pestaña. Rellena <code>CONFIG</code> con la URL y la clave de tu proyecto para guardar en Supabase.</span>
   </div>
 
   <!-- LOGIN -->
   <section id="view-login" class="login" hidden>
-    <h2>Entra con tu email</h2>
-    <p>Te enviamos un enlace de acceso. Solo funcionan los emails invitados al hogar.</p>
-    <input class="field" id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
-    <button class="primary mt" id="loginBtn">Enviarme el enlace</button>
+    <div id="loginStep1">
+      <h2>Entra con tu email</h2>
+      <p>Te enviamos un código de acceso. Solo funcionan los emails invitados al hogar.</p>
+      <input class="field" id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
+      <button class="primary mt" id="loginBtn">Enviarme el código</button>
+    </div>
+    <div id="loginStep2" hidden>
+      <h2>Escribe el código</h2>
+      <p id="codeTxt"></p>
+      <input class="field code" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="······">
+      <button class="primary mt" id="codeBtn">Entrar</button>
+      <button class="linkbtn" id="codeBack">Cambiar email o reenviar</button>
+    </div>
     <p class="hint" id="loginMsg"></p>
   </section>
 
@@ -247,16 +275,16 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 
     <input class="field mt" id="desc" placeholder="Descripción (opcional)" autocomplete="off" maxlength="140">
 
-    <div class="lbl" id="pagadorLbl">¿Quién paga?</div>
-    <div class="seg wrap" id="pagadorSeg"></div>
+    <div class="lbl" id="cuentaLbl">¿Desde qué cuenta?</div>
+    <div class="seg" id="cuentaSeg"></div>
 
     <div class="card mt" id="shareBox">
-      <div class="row">
+      <div class="row" id="shareRow">
         <span class="t">Gasto compartido</span>
         <label class="switch"><input type="checkbox" id="compartido"><i></i></label>
       </div>
       <div class="reparto" id="repartoBox" hidden>
-        <input type="range" id="pct" min="0" max="100" step="5" value="50" aria-label="Reparto">
+        <input type="range" id="pct" min="0" max="100" step="1" value="50" aria-label="Reparto">
         <div class="legend"><span id="pctA"></span><span id="pctB"></span></div>
         <div class="presets">
           <button data-p="50">50/50</button>
@@ -265,9 +293,53 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
       </div>
       <p class="hint" id="shareHint"></p>
     </div>
+  </section>
 
-    <label class="fl" style="margin-top:16px" for="cuenta">Cuenta</label>
-    <select class="field" id="cuenta"></select>
+  <!-- APORTAR -->
+  <section id="view-aportar" hidden>
+    <div class="seg" id="apModo">
+      <button data-v="yo" class="on">Solo yo</button>
+      <button data-v="dos">Entre los dos</button>
+    </div>
+    <p class="intro" id="apIntro"></p>
+
+    <label class="amount">
+      <input id="apImporte" inputmode="decimal" autocomplete="off" placeholder="0,00" aria-label="Importe">
+      <span>€</span>
+    </label>
+
+    <div class="dates" id="apDates">
+      <button class="pill" data-d="0">Hoy</button>
+      <button class="pill" data-d="1">Ayer</button>
+      <input class="pill" type="date" id="apFecha" aria-label="Fecha">
+    </div>
+
+    <div id="apDesdeBox" hidden>
+      <label class="fl" for="apDesde">Desde</label>
+      <select class="field" id="apDesde"></select>
+    </div>
+    <input class="field mt2" id="apConcepto" placeholder="Concepto (opcional)" autocomplete="off" maxlength="140">
+
+    <div class="card mt" id="apRepBox" hidden>
+      <span class="t">¿Cómo lo repartís?</span>
+      <div class="seg mt" id="apRepSeg">
+        <button data-v="ingresos">Según ingresos</button>
+        <button data-v="50_50">50/50</button>
+        <button data-v="manual">A mano</button>
+      </div>
+      <div class="reparto" id="apPctBox" hidden>
+        <input type="range" id="apPct" min="0" max="100" step="1" value="50" aria-label="Tu porcentaje">
+      </div>
+      <div class="parts" id="apPartes"></div>
+      <p class="hint" id="apRepHint"></p>
+      <div class="row mt2">
+        <span class="t">Ya he transferido mi parte</span>
+        <label class="switch"><input type="checkbox" id="apYa" checked><i></i></label>
+      </div>
+    </div>
+
+    <div class="lbl" id="apListLbl" hidden>Aportaciones</div>
+    <div id="apList"></div>
   </section>
 
   <!-- MOVIMIENTOS -->
@@ -279,50 +351,16 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     </div>
     <div class="stats" id="stats"></div>
     <div class="balance" id="balance" hidden></div>
+    <div class="scope" id="scope"></div>
     <div id="lista"></div>
-  </section>
-
-  <!-- IMPORTAR -->
-  <section id="view-import" hidden>
-    <div class="grid2">
-      <div>
-        <label class="fl" for="impPagador">Titular</label>
-        <select class="field" id="impPagador"></select>
-      </div>
-      <div>
-        <label class="fl" for="impCuenta">Cuenta</label>
-        <select class="field" id="impCuenta"></select>
-      </div>
-    </div>
-    <label class="chkrow"><input type="checkbox" id="impCompartido"> Marcar todos los gastos como compartidos</label>
-
-    <div id="impStart" class="mt">
-      <label class="drop">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0 4 4m-4-4L8 7"/><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
-        <span class="t">Sube el CSV de tu banco</span>
-        <span class="s">Detecto columnas, fechas y formato español (1.234,56). Si tu banco solo da Excel, guárdalo como CSV.</span>
-        <input type="file" id="impFile" accept=".csv,.txt,text/csv" hidden>
-      </label>
-      <button class="linkbtn" id="impSample">Probar con un CSV de ejemplo</button>
-    </div>
-
-    <div id="impWork" hidden>
-      <div class="card mt">
-        <div class="row" style="margin-bottom:10px"><span class="t" id="impName">Archivo</span><button class="ghost" id="impReset">Cambiar</button></div>
-        <div class="map" id="impMap"></div>
-        <label class="chkrow"><input type="checkbox" id="impInvert"> Mi banco pone los gastos en positivo</label>
-      </div>
-      <div class="summary" id="impSummary"></div>
-      <div class="items" id="impList"></div>
-    </div>
   </section>
 </div>
 
 <div class="savebar" id="savebar" hidden>
   <button class="primary" id="guardar">Guardar</button>
 </div>
-<div class="savebar" id="impBar" hidden>
-  <button class="primary" id="impBtn">Importar</button>
+<div class="savebar" id="apBar" hidden>
+  <button class="primary" id="apGuardar">Registrar aportación</button>
 </div>
 
 <nav class="tabs" id="tabs" hidden>
@@ -330,22 +368,24 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     <button data-tab="add" class="on">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Añadir
     </button>
+    <button data-tab="aportar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>Aportar
+      <span class="dot" id="apDot" hidden></span>
+    </button>
     <button data-tab="list">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>Movimientos
-    </button>
-    <button data-tab="import">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Importar
     </button>
   </div>
 </nav>
 
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 /* =====================================================================
    CONFIGURACIÓN
-   Deja los campos vacíos para ver el modo demo.
-   Usa SOLO la clave anon/publishable. Nunca la service_role.
+   Vacío = modo demo. Usa SOLO la clave anon/publishable, nunca la service_role.
+   SUPABASE_URL sin nada detrás de ".co" (ni barra, ni /rest/v1).
    ===================================================================== */
 const CONFIG = {
   SUPABASE_URL: 'https://fbhzczoulztuoighzugf.supabase.co',       // p. ej. https://abcdefgh.supabase.co
@@ -353,7 +393,6 @@ const CONFIG = {
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 
-/* Catálogo base (igual que sembrar_datos_base del SQL; solo se usa en demo) */
 const BASE_CATEGORIAS = [
   ['Vivienda','gasto','fijo','🏠','#0F6B5F'], ['Suministros','gasto','fijo','💡','#CA8A04'],
   ['Internet y móvil','gasto','fijo','📶','#2563EB'], ['Súper','gasto','variable','🛒','#16A34A'],
@@ -366,118 +405,49 @@ const BASE_CATEGORIAS = [
   ['Nómina','ingreso',null,'💼','#15803D'], ['Bizum y transferencias','ingreso',null,'💸','#059669'],
   ['Reembolsos','ingreso',null,'↩️','#65A30D'], ['Otros ingresos','ingreso',null,'➕','#4D7C0F'],
 ].map(([nombre,tipo,naturaleza,icono,color],i)=>({nombre,tipo,naturaleza,icono,color,orden:i}));
-const BASE_REGLAS = [
-  ['MERCADONA','Súper'],['LIDL','Súper'],['CARREFOUR','Súper'],['EROSKI','Súper'],['ALCAMPO','Súper'],['ALDI','Súper'],
-  ['IBERDROLA','Suministros'],['ENDESA','Suministros'],['NATURGY','Suministros'],['AGUAS','Suministros'],
-  ['MOVISTAR','Internet y móvil'],['VODAFONE','Internet y móvil'],['ORANGE','Internet y móvil'],['DIGI','Internet y móvil'],['EUSKALTEL','Internet y móvil'],
-  ['NETFLIX','Suscripciones'],['SPOTIFY','Suscripciones'],['HBO','Suscripciones'],['DISNEY','Suscripciones'],
-  ['RENFE','Transporte'],['BIZKAIBUS','Transporte'],['METRO BILBAO','Transporte'],['CABIFY','Transporte'],['UBER','Transporte'],
-  ['REPSOL','Coche'],['CEPSA','Coche'],['PETRONOR','Coche'],
-  ['GLOVO','Restaurantes'],['JUST EAT','Restaurantes'],['UBER EATS','Restaurantes'],
-  ['IKEA','Hogar y muebles'],['LEROY MERLIN','Hogar y muebles'],['FARMACIA','Salud'],
-  ['ZARA','Ropa'],['PRIMARK','Ropa'],['RYANAIR','Viajes'],['VUELING','Viajes'],['BOOKING','Viajes'],
-  ['NOMINA','Nómina'],
-];
 
 /* ===================== Utilidades ===================== */
 const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const EUR = new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR'});
+const EUR = new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', useGrouping:'always'});
+const EUR0 = new Intl.NumberFormat('es-ES', {style:'currency', currency:'EUR', maximumFractionDigits:0, useGrouping:'always'});
 const money = n => EUR.format(n || 0);
+const money0 = n => EUR0.format(Math.round(n || 0));
+const pctTxt = n => Math.round(n * 100) + ' %';
 const pad = n => String(n).padStart(2, '0');
 const isoDate = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const today = () => isoDate(new Date());
 const addDays = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(d.getDate() + n); return isoDate(d); };
 const monthStart = s => s.slice(0, 7) + '-01';
 const addMonths = (s, n) => { const d = new Date(s + 'T12:00:00'); d.setDate(1); d.setMonth(d.getMonth() + n); return isoDate(d); };
-const norm = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+const mesNombre = s => new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long' });
+const fechaCorta = s => new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 const round2 = n => Math.round(n * 100) / 100;
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 
 function parseImporte(v) {
-  let s = String(v ?? '').replace(/[€\s\u00a0]/g, '').replace(/^\+/, '');
+  let s = String(v ?? '').replace(/[€\s ]/g, '').replace(/^\+/, '');
   if (!s) return NaN;
-  const neg = /^-|-$|^\(.*\)$/.test(s);
-  s = s.replace(/[-()]/g, '');
+  const neg = /^-/.test(s); s = s.replace(/-/g, '');
   const lc = s.lastIndexOf(','), ld = s.lastIndexOf('.');
-  if (lc > -1 && ld > -1) {
-    s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
-  } else if (lc > -1) {
-    s = s.replace(/\./g, '').replace(',', '.');
-  } else if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
-    s = s.replace(/\./g, '');
-  }
+  if (lc > -1 && ld > -1) s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  else if (lc > -1) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
   const n = parseFloat(s);
   return isFinite(n) ? (neg ? -n : n) : NaN;
 }
+const amountOf = el => { const n = parseImporte(el.value); return isFinite(n) ? Math.abs(n) : 0; };
+const fmtInput = n => n ? String(round2(n)).replace('.', ',') : '';
 
-function parseFecha(v) {
-  const s = String(v ?? '').trim();
-  let m;
-  if ((m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/))) return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
-  if ((m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/))) {
-    const y = m[3].length === 2 ? '20' + m[3] : m[3];
-    if (+m[2] > 12) return null;
-    return `${y}-${pad(m[2])}-${pad(m[1])}`;
-  }
-  return null;
-}
-
-function parseCSV(text) {
-  text = text.replace(/^\uFEFF/, '');
-  const lines = text.split(/\r?\n/).filter(l => l.trim()).slice(0, 20);
-  const score = d => lines.filter(l => l.includes(d)).length;
-  const delim = score(';') >= lines.length * 0.5 ? ';' : score('\t') >= lines.length * 0.5 ? '\t' : ',';
-  const rows = []; let row = [], cell = '', q = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (q) {
-      if (ch === '"') { if (text[i+1] === '"') { cell += '"'; i++; } else q = false; }
-      else cell += ch;
-    } else if (ch === '"') q = true;
-    else if (ch === delim) { row.push(cell); cell = ''; }
-    else if (ch === '\n' || ch === '\r') {
-      if (ch === '\r' && text[i+1] === '\n') i++;
-      row.push(cell); rows.push(row); row = []; cell = '';
-    } else cell += ch;
-  }
-  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
-  return rows.map(r => r.map(c => c.trim())).filter(r => r.some(c => c !== ''));
-}
-
-function findHeader(rows) {
-  for (let i = 0; i < Math.min(rows.length, 25); i++) {
-    const r = rows[i].map(norm);
-    if (r.length >= 3 && r.some(c => c.includes('fecha') || c === 'date') && r.some(c => /importe|cantidad|amount/.test(c))) return i;
-  }
-  return 0;
-}
-
-function autoMap(header) {
-  const h = header.map(norm);
-  const find = (re, not) => h.findIndex(c => re.test(c) && !(not && not.test(c)));
-  let fecha = find(/fecha (de )?operacion|fecha contable/);
-  if (fecha < 0) fecha = find(/fecha|date/);
-  let importe = find(/importe|cantidad|amount/, /saldo|balance/);
-  let concepto = find(/concepto|descripcion|detalle|movimiento|description/);
-  if (concepto < 0) concepto = h.findIndex((_, i) => i !== fecha && i !== importe);
-  return { fecha: Math.max(fecha, 0), concepto: Math.max(concepto, 0), importe: Math.max(importe, 0) };
-}
-
-async function readFile(f) {
-  const buf = await f.arrayBuffer();
-  try { return new TextDecoder('utf-8', {fatal: true}).decode(buf); }
-  catch { return new TextDecoder('windows-1252').decode(buf); }
-}
-
-function calcBalance(movs, miembros, liq = []) {
+function calcBalance(movs, miembros) {
   const s = Object.fromEntries(miembros.map(m => [m.id, 0]));
   for (const mv of movs) {
     if (mv.tipo !== 'gasto' || mv.ambito !== 'compartido' || !mv.pagado_por) continue;
     const parteOtro = mv.importe * (1 - mv.pct_pagador);
     for (const m of miembros) s[m.id] += m.id === mv.pagado_por ? parteOtro : -parteOtro;
   }
-  for (const l of liq) { s[l.de_miembro] += l.importe; s[l.a_miembro] -= l.importe; }
   return miembros.map(m => ({ miembro_id: m.id, nombre: m.nombre, saldo: round2(s[m.id]) }));
 }
 
@@ -485,65 +455,94 @@ function calcBalance(movs, miembros, liq = []) {
 function demoApi() {
   let seq = 100;
   const nid = p => p + (++seq);
+  const now = () => new Date(Date.now() + seq).toISOString();
   const hogar = { id: 'h1', nombre: 'Casa · demo', reparto_defecto: 0.5 };
   const miembros = [
-    { id: 'm1', hogar_id: 'h1', user_id: 'u1', nombre: 'Valvanuz', color: '#0F6B5F', ingreso_neto_mensual: 2100 },
-    { id: 'm2', hogar_id: 'h1', user_id: 'u2', nombre: 'Pareja',   color: '#C2410C', ingreso_neto_mensual: 1700 },
+    { id: 'm1', hogar_id: 'h1', user_id: 'u1', nombre: 'Valvanuz', ingreso_neto_mensual: 2100 },
+    { id: 'm2', hogar_id: 'h1', user_id: 'u2', nombre: 'Fran',     ingreso_neto_mensual: 1700 },
   ];
   const categorias = BASE_CATEGORIAS.map((c, i) => ({ ...c, id: 'c' + i }));
   const catId = n => categorias.find(c => c.nombre === n)?.id;
   const cuentas = [
     { id: 'a1', nombre: 'Cuenta común',    tipo: 'comun',     titular_id: null },
     { id: 'a2', nombre: 'Cuenta Valvanuz', tipo: 'corriente', titular_id: 'm1' },
-    { id: 'a3', nombre: 'Cuenta Pareja',   tipo: 'corriente', titular_id: 'm2' },
+    { id: 'a3', nombre: 'Cuenta Fran',     tipo: 'corriente', titular_id: 'm2' },
     { id: 'a4', nombre: 'Efectivo',        tipo: 'efectivo',  titular_id: null },
   ];
-  const reglas = BASE_REGLAS.map(([patron, cat], i) => ({ id: 'r' + i, patron, categoria_id: catId(cat), prioridad: 100, ambito: null }));
   const t = today(), ms = monthStart(t);
   const f = n => { const d = addDays(t, -n); return d < ms ? ms : d; };
   let movs = [
-    [f(0), 'gasto', 42.80, 'Súper', 'MERCADONA', 'm1', 'compartido', 'a2'],
+    [f(0), 'gasto', 42.80, 'Súper', 'MERCADONA', null, 'compartido', 'a1'],
     [f(0), 'gasto', 3.20, 'Restaurantes', 'Café', 'm1', 'personal', 'a2'],
     [f(1), 'gasto', 18.50, 'Restaurantes', 'Pintxos con amigas', 'm1', 'personal', 'a2'],
     [f(1), 'gasto', 63.20, 'Suministros', 'IBERDROLA', null, 'compartido', 'a1'],
-    [f(2), 'gasto', 24.00, 'Súper', 'EROSKI', 'm2', 'compartido', 'a3'],
-    [f(2), 'gasto', 12.99, 'Suscripciones', 'NETFLIX', 'm2', 'compartido', 'a3'],
+    [f(2), 'gasto', 24.00, 'Ropa', 'Zapatillas', 'm2', 'personal', 'a3'],
+    [f(2), 'gasto', 12.99, 'Suscripciones', 'NETFLIX', 'm1', 'compartido', 'a2'],
     [ms,   'ingreso', 2100, 'Nómina', 'Nómina', 'm1', 'personal', 'a2'],
+    [ms,   'ingreso', 1700, 'Nómina', 'Nómina', 'm2', 'personal', 'a3'],
   ].map(([fecha, tipo, importe, cat, descripcion, pagado_por, ambito, cuenta_id]) => ({
     id: nid('mv'), hogar_id: 'h1', fecha, tipo, importe, categoria_id: catId(cat), descripcion, pagado_por, ambito,
-    pct_pagador: ambito === 'compartido' ? 0.5 : 1, cuenta_id, origen: 'manual', import_hash: null, created_at: new Date().toISOString(),
+    pct_pagador: ambito === 'compartido' ? 0.5 : 1, cuenta_id, created_at: now(),
   }));
+  const concepto = `Gastos de ${mesNombre(ms)}`;
+  let trs = [{ id: 't1', hogar_id: 'h1', fecha: f(1), de_cuenta: 'a3', a_cuenta: 'a1', importe: 536.84, miembro_id: 'm2', aportacion_id: 'ap1', nota: concepto, created_at: now() }];
+  let aps = [{
+    id: 'ap1', fecha: f(1), total: 1200, cuenta_destino: 'a1', modo: 'ingresos', concepto, creada_por: 'm2', created_at: now(),
+    partes: [
+      { id: 'p1', aportacion_id: 'ap1', miembro_id: 'm1', pct: 0.5526, importe: 663.16, estado: 'pendiente', transferencia_id: null },
+      { id: 'p2', aportacion_id: 'ap1', miembro_id: 'm2', pct: 0.4474, importe: 536.84, estado: 'hecha', transferencia_id: 't1' },
+    ],
+  }];
+  const addTr = r => { const row = { ...r, id: nid('t'), hogar_id: 'h1', created_at: now() }; trs.push(row); return row; };
   return {
-    mode: 'demo',
-    onAuth() {},
-    async catalog() { return { hogar, me: miembros[0], email: 'modo demo', miembros, cuentas, categorias, reglas }; },
-    async listMovs(desde, hasta) {
-      return movs.filter(m => m.fecha >= desde && m.fecha < hasta)
-        .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.created_at.localeCompare(a.created_at));
+    mode: 'demo', onAuth() {}, async signOut() {},
+    async catalog() { return { hogar, me: miembros[0], email: 'modo demo', miembros, cuentas, categorias }; },
+    async listMovs(d, h) { return movs.filter(m => m.fecha >= d && m.fecha < h); },
+    async listTrs(d, h) { return trs.filter(x => x.fecha >= d && x.fecha < h); },
+    async insertMov(r) { movs.push({ ...r, id: nid('mv'), hogar_id: 'h1', created_at: now() }); },
+    async removeMov(id) { movs = movs.filter(m => m.id !== id); },
+    async insertTransfer(r) { addTr(r); },
+    async removeTrs(id) {
+      trs = trs.filter(x => x.id !== id);
+      aps.forEach(a => a.partes.forEach(p => { if (p.transferencia_id === id) { p.estado = 'pendiente'; p.transferencia_id = null; } }));
     },
-    async insert(rows) {
-      let inserted = 0;
-      for (const r of rows) {
-        if (r.import_hash && movs.some(m => m.import_hash === r.import_hash)) continue;
-        let row = { ...r, id: nid('mv'), hogar_id: 'h1', created_at: new Date().toISOString() };
-        if (!row.categoria_id && row.descripcion) {
-          const rg = matchRegla(row.descripcion, row.tipo);
-          if (rg) row.categoria_id = rg.categoria_id;
+    async aportaciones() {
+      return aps.map(a => ({ ...a, aportacion_partes: a.partes.map(p => ({ ...p })) }))
+        .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    },
+    async crearAportacion(p) {
+      const a = { id: nid('ap'), fecha: p.fecha, total: p.total, cuenta_destino: p.cuenta_destino, modo: p.modo, concepto: p.concepto || null, creada_por: 'm1', created_at: now(), partes: [] };
+      for (const x of p.partes) {
+        const parte = { id: nid('p'), aportacion_id: a.id, ...x, estado: 'pendiente', transferencia_id: null };
+        if (p.mi_cuenta && x.miembro_id === 'm1' && x.importe > 0) {
+          const tr = addTr({ fecha: p.fecha, de_cuenta: p.mi_cuenta, a_cuenta: p.cuenta_destino, importe: x.importe, miembro_id: 'm1', aportacion_id: a.id, nota: a.concepto });
+          parte.estado = 'hecha'; parte.transferencia_id = tr.id;
         }
-        movs.push(row); inserted++;
+        a.partes.push(parte);
       }
-      return { inserted, skipped: rows.length - inserted };
+      aps.push(a);
+      return a.id;
     },
-    async remove(id) { movs = movs.filter(m => m.id !== id); },
+    async registrarParte(id, importe, de, fecha) {
+      for (const a of aps) for (const p of a.partes) if (p.id === id) {
+        if (p.estado === 'hecha') throw new Error('Esta parte ya está registrada');
+        const tr = addTr({ fecha, de_cuenta: de, a_cuenta: a.cuenta_destino, importe: round2(importe), miembro_id: p.miembro_id, aportacion_id: a.id, nota: a.concepto });
+        p.estado = 'hecha'; p.transferencia_id = tr.id;
+        return tr.id;
+      }
+      throw new Error('Aportación no encontrada');
+    },
+    async cancelarAportacion(id) { aps = aps.filter(a => a.id !== id); trs.forEach(x => { if (x.aportacion_id === id) x.aportacion_id = null; }); },
+    async ingresosMedios() { return []; },
+    async updateIngreso(v) { miembros[0].ingreso_neto_mensual = v; },
     async balance() { return calcBalance(movs, miembros); },
-    async signOut() {},
   };
 }
 
 /* ===================== Capa de datos: SUPABASE ===================== */
 function supaApi() {
   const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-  let hogarId = null;
+  let hogarId = null, meId = null;
   const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
   return {
     mode: 'supabase',
@@ -554,37 +553,56 @@ function supaApi() {
       });
       if (error) throw new Error(error.message);
     },
+    async verify(email, token) {
+      const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
+      if (error) throw new Error(error.message);
+    },
     async signOut() { await sb.auth.signOut(); },
     async catalog() {
       const { data: { user } } = await sb.auth.getUser();
       const { data: me, error } = await sb.from('miembros').select('*').eq('user_id', user.id).maybeSingle();
       if (error) throw new Error(error.message);
-      if (!me) throw new Error('Tu usuario no está asociado a ningún hogar. Revisa el paso 7 del schema.sql.');
-      hogarId = me.hogar_id;
-      const [hogar, miembros, cuentas, categorias, reglas] = await Promise.all([
+      if (!me) throw new Error('Tu usuario no está asociado a ningún hogar. Revisa el paso del SQL que crea el hogar y los miembros.');
+      hogarId = me.hogar_id; meId = me.id;
+      const [hogar, miembros, cuentas, categorias] = await Promise.all([
         sb.from('hogares').select('*').eq('id', hogarId).single().then(ok),
         sb.from('miembros').select('*').eq('hogar_id', hogarId).order('created_at').then(ok),
         sb.from('cuentas').select('*').eq('hogar_id', hogarId).eq('activa', true).order('nombre').then(ok),
         sb.from('categorias').select('*').eq('hogar_id', hogarId).eq('activa', true).order('orden').then(ok),
-        sb.from('reglas').select('*').eq('hogar_id', hogarId).eq('activa', true).order('prioridad').then(ok),
       ]);
-      return { hogar, me, email: user.email, miembros, cuentas, categorias, reglas };
+      return { hogar, me: miembros.find(m => m.id === meId) || me, email: user.email, miembros, cuentas, categorias };
     },
     async listMovs(desde, hasta) {
       return ok(await sb.from('movimientos').select('*').eq('hogar_id', hogarId)
-        .gte('fecha', desde).lt('fecha', hasta)
-        .order('fecha', { ascending: false }).order('created_at', { ascending: false }));
+        .gte('fecha', desde).lt('fecha', hasta).order('fecha', { ascending: false }).order('created_at', { ascending: false }));
     },
-    async insert(rows) {
-      rows = rows.map(r => ({ ...r, hogar_id: hogarId }));
-      const manual = rows.filter(r => !r.import_hash), csv = rows.filter(r => r.import_hash);
-      let inserted = 0;
-      if (manual.length) inserted += ok(await sb.from('movimientos').insert(manual).select('id')).length;
-      if (csv.length) inserted += ok(await sb.from('movimientos')
-        .upsert(csv, { onConflict: 'hogar_id,import_hash', ignoreDuplicates: true }).select('id')).length;
-      return { inserted, skipped: rows.length - inserted };
+    async listTrs(desde, hasta) {
+      return ok(await sb.from('transferencias').select('*').eq('hogar_id', hogarId)
+        .gte('fecha', desde).lt('fecha', hasta).order('fecha', { ascending: false }).order('created_at', { ascending: false }));
     },
-    async remove(id) { ok(await sb.from('movimientos').delete().eq('id', id)); },
+    async insertMov(row) { ok(await sb.from('movimientos').insert({ ...row, hogar_id: hogarId })); },
+    async removeMov(id) { ok(await sb.from('movimientos').delete().eq('id', id)); },
+    async insertTransfer(row) { ok(await sb.from('transferencias').insert({ ...row, hogar_id: hogarId })); },
+    async removeTrs(id) { ok(await sb.from('transferencias').delete().eq('id', id)); },
+    async aportaciones() {
+      return ok(await sb.from('aportaciones').select('*, aportacion_partes(*)').eq('hogar_id', hogarId)
+        .order('created_at', { ascending: false }).limit(8));
+    },
+    async crearAportacion(p) {
+      return ok(await sb.rpc('crear_aportacion', {
+        p_total: p.total, p_partes: p.partes, p_cuenta_destino: p.cuenta_destino, p_modo: p.modo,
+        p_concepto: p.concepto || null, p_fecha: p.fecha, p_mi_cuenta: p.mi_cuenta || null,
+      }));
+    },
+    async registrarParte(id, importe, de, fecha) {
+      return ok(await sb.rpc('registrar_parte', { p_parte: id, p_importe: importe, p_de_cuenta: de, p_fecha: fecha }));
+    },
+    async cancelarAportacion(id) { ok(await sb.from('aportaciones').delete().eq('id', id)); },
+    async ingresosMedios(desde, hasta) {
+      return ok(await sb.from('movimientos').select('pagado_por,importe').eq('hogar_id', hogarId)
+        .eq('tipo', 'ingreso').gte('fecha', desde).lt('fecha', hasta));
+    },
+    async updateIngreso(v) { ok(await sb.from('miembros').update({ ingreso_neto_mensual: v }).eq('id', meId)); },
     async balance() { return ok(await sb.from('v_balance_pareja').select('*').eq('hogar_id', hogarId)); },
   };
 }
@@ -593,38 +611,25 @@ function supaApi() {
 let api;
 const state = {
   started: false, tab: 'add', cat: null,
-  tipo: 'gasto', categoria: null, pagador: null, compartido: false, pct: 50,
-  fecha: today(), cuenta: null,
-  mes: monthStart(today()), movs: [], bal: [], openId: null,
-  imp: null,
+  tipo: 'gasto', categoria: null, cuenta: null, compartido: false, pct: 50, fecha: today(),
+  ap: { modo: 'yo', fecha: today(), rep: 'ingresos', pct: 50, desde: null },
+  mes: monthStart(today()), movs: [], trs: [], bal: [], openId: null,
+  aps: [], ingresos: {}, dismissed: new Set(), loginEmail: '',
 };
-const TITLES = { add: 'Nuevo movimiento', list: 'Movimientos', import: 'Importar del banco' };
+const TITLES = { add: 'Nuevo movimiento', aportar: 'Aportar a la común', list: 'Movimientos' };
 
 const me = () => state.cat.me;
 const miembro = id => state.cat.miembros.find(m => m.id === id);
 const otroDe = id => state.cat.miembros.find(m => m.id !== id);
+const otro = () => otroDe(me().id);
 const categoria = id => state.cat.categorias.find(c => c.id === id);
-const cuentaComun = () => state.cat.cuentas.find(c => c.tipo === 'comun');
+const cuenta = id => state.cat.cuentas.find(c => c.id === id);
+const comun = () => state.cat.cuentas.find(c => c.tipo === 'comun');
+const misCuentas = () => state.cat.cuentas.filter(c => c.titular_id === me().id);
+const visibles = () => [...misCuentas(), comun()].filter(Boolean);
+const esComun = id => cuenta(id)?.tipo === 'comun';
 const nombreCorto = m => !m ? 'Cuenta común' : m.id === me().id ? 'Tú' : m.nombre;
-
-function matchRegla(desc, tipo) {
-  const d = norm(desc);
-  if (!d || !state.cat) return null;
-  let best = null;
-  for (const r of state.cat.reglas) {
-    const c = categoria(r.categoria_id);
-    if (!c || c.tipo !== tipo) continue;
-    const p = norm(r.patron);
-    if (p && d.includes(p) && (!best || r.prioridad < best.prioridad || (r.prioridad === best.prioridad && p.length > norm(best.patron).length))) best = r;
-  }
-  return best;
-}
-
-function defaultCuenta(pagador) {
-  const cs = state.cat.cuentas;
-  if (pagador === 'comun') return cuentaComun()?.id || cs[0]?.id || '';
-  return cs.find(c => c.titular_id === pagador)?.id || cs[0]?.id || '';
-}
+const nombreCuenta = c => !c ? '—' : c.tipo === 'comun' ? 'Cuenta común' : c.titular_id === me().id ? (misCuentas().length > 1 ? c.nombre : 'Mi cuenta') : c.nombre;
 
 function toast(msg, kind = '') {
   const t = $('#toast');
@@ -632,7 +637,32 @@ function toast(msg, kind = '') {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.className = 'toast', 2800);
 }
 
-/* ===================== Arranque ===================== */
+/* ===================== Ingresos (para repartir según ingresos) ===================== */
+async function loadIngresos() {
+  const ms = state.cat.miembros, avg = {};
+  if (ms.some(m => !(+m.ingreso_neto_mensual > 0))) {
+    const cur = monthStart(today());
+    try {
+      const rows = await api.ingresosMedios(addMonths(cur, -3), cur);
+      rows.forEach(r => { if (r.pagado_por) avg[r.pagado_por] = (avg[r.pagado_por] || 0) + (+r.importe) / 3; });
+    } catch {}
+  }
+  state.ingresos = Object.fromEntries(ms.map(m => {
+    const v = +m.ingreso_neto_mensual;
+    return [m.id, v > 0 ? { v, src: 'perfil' } : avg[m.id] > 0 ? { v: round2(avg[m.id]), src: 'media' } : { v: 0, src: null }];
+  }));
+}
+const ingresosOk = () => state.cat.miembros.length === 2 && state.cat.miembros.every(m => state.ingresos[m.id]?.v > 0);
+const shareIngresos = id => { const a = state.ingresos[id].v, b = state.ingresos[otroDe(id).id].v; return a / (a + b); };
+function ingresosTxt() {
+  const parts = [me(), otro()].filter(Boolean).map(m => {
+    const x = state.ingresos[m.id];
+    return `${nombreCorto(m)} ${x?.v ? money0(x.v) + (x.src === 'media' ? ' (media 3 meses)' : '') : 'sin indicar'}`;
+  });
+  return parts.join(' · ');
+}
+
+/* ===================== Arranque y login ===================== */
 async function boot() {
   $('#demoBanner').hidden = !DEMO;
   if (!DEMO && !window.supabase) return showMsg('No se pudo cargar la librería de Supabase. Revisa tu conexión.');
@@ -642,37 +672,70 @@ async function boot() {
 }
 
 function hideAll() {
-  ['login', 'msg', 'add', 'list', 'import'].forEach(v => $('#view-' + v).hidden = true);
-  $('#savebar').hidden = true; $('#impBar').hidden = true;
+  ['login', 'msg', 'add', 'aportar', 'list'].forEach(v => $('#view-' + v).hidden = true);
+  $('#savebar').hidden = true; $('#apBar').hidden = true;
+  document.body.dataset.bar = '0';
 }
 function showLogin() {
-  state.started = false; hideAll();
+  state.started = false; hideAll(); closeModal();
   $('#tabs').hidden = true; $('#who').hidden = true;
   $('#viewTitle').textContent = 'Entrar'; $('#hogarName').textContent = 'Finanzas';
+  $('#loginEmail').value = lsGet('fin_email') || '';
+  $('#loginStep1').hidden = false; $('#loginStep2').hidden = true; $('#loginMsg').textContent = '';
   $('#view-login').hidden = false;
 }
-function showMsg(text) {
-  hideAll(); $('#tabs').hidden = true;
-  $('#msgText').textContent = text; $('#view-msg').hidden = false;
+function showMsg(text) { hideAll(); $('#tabs').hidden = true; $('#msgText').textContent = text; $('#view-msg').hidden = false; }
+
+function bindLogin() {
+  const send = async () => {
+    const email = $('#loginEmail').value.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(email)) return toast('Escribe un email válido', 'err');
+    $('#loginBtn').disabled = true; $('#loginMsg').textContent = '';
+    try {
+      await api.signIn(email);
+      state.loginEmail = email; lsSet('fin_email', email);
+      $('#codeTxt').textContent = `Te lo hemos enviado a ${email}. Escríbelo aquí, sin salir de la app.`;
+      $('#loginStep1').hidden = true; $('#loginStep2').hidden = false;
+      $('#loginCode').value = ''; setTimeout(() => $('#loginCode').focus(), 50);
+    } catch (e) { $('#loginMsg').textContent = 'No se pudo enviar el código: ' + e.message; }
+    finally { $('#loginBtn').disabled = false; }
+  };
+  const verify = async () => {
+    const token = $('#loginCode').value.replace(/\D/g, '');
+    if (token.length < 6) return toast('El código tiene al menos 6 cifras', 'err');
+    $('#codeBtn').disabled = true; $('#loginMsg').textContent = '';
+    try { await api.verify(state.loginEmail, token); }
+    catch (e) { $('#loginMsg').textContent = 'Código no válido o caducado. Pide otro. (' + e.message + ')'; }
+    finally { $('#codeBtn').disabled = false; }
+  };
+  $('#loginBtn').addEventListener('click', send);
+  $('#loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  $('#codeBtn').addEventListener('click', verify);
+  $('#loginCode').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
+  $('#loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+  $('#codeBack').addEventListener('click', () => { $('#loginStep1').hidden = false; $('#loginStep2').hidden = true; $('#loginMsg').textContent = ''; });
 }
 
 async function start() {
   if (state.started) return;
   state.started = true;
-  try { state.cat = await api.catalog(); }
-  catch (e) { state.started = false; return showMsg(e.message); }
-  const m = me();
+  try {
+    state.cat = await api.catalog();
+    await loadIngresos();
+  } catch (e) { state.started = false; return showMsg(e.message); }
+  if (!misCuentas().length && !comun()) return showMsg('No encuentro tu cuenta ni la cuenta común. Revisa la tabla cuentas.');
   $('#hogarName').textContent = state.cat.hogar.nombre;
-  $('#avatar').textContent = (m.nombre || '?').charAt(0).toUpperCase();
+  $('#avatar').textContent = (me().nombre || '?').charAt(0).toUpperCase();
   $('#menuEmail').textContent = state.cat.email || '';
-  $('#who').hidden = false; $('#tabs').hidden = false;
   $('#logout').hidden = DEMO;
-  state.pagador = m.id; state.cuenta = defaultCuenta(m.id);
-  const ing = state.cat.miembros.every(x => +x.ingreso_neto_mensual > 0);
-  $('#presetProp').disabled = !ing;
-  $('#presetProp').title = ing ? '' : 'Añade el ingreso neto de cada uno en la tabla miembros';
-  renderAdd(); fillImportSelects();
+  $('#who').hidden = false; $('#tabs').hidden = false;
+  state.cuenta = misCuentas()[0]?.id || comun()?.id;
+  state.ap.desde = misCuentas()[0]?.id || null;
+  state.ap.rep = ingresosOk() ? 'ingresos' : '50_50';
+  renderAdd(); renderAp();
   go('add');
+  await refreshAps();
+  maybePopup();
 }
 
 function go(tab) {
@@ -680,226 +743,430 @@ function go(tab) {
   $('#view-' + tab).hidden = false;
   $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   $('#savebar').hidden = tab !== 'add';
-  $('#impBar').hidden = !(tab === 'import' && state.imp?.items?.length);
-  document.body.dataset.tab = tab === 'import' && state.imp ? 'add' : tab;
+  $('#apBar').hidden = tab !== 'aportar';
+  document.body.dataset.bar = tab === 'list' ? '0' : '1';
   $('#viewTitle').textContent = TITLES[tab];
   if (tab === 'list') loadList();
+  if (tab === 'aportar') { renderAp(); refreshAps(); }
   window.scrollTo(0, 0);
 }
 
-/* ===================== Vista AÑADIR ===================== */
-function getImporte() { const n = parseImporte($('#importe').value); return isFinite(n) ? Math.abs(n) : 0; }
+/* ===================== Fechas (pills) ===================== */
+function syncDates(box, input, value) {
+  const t = today();
+  $$(box + ' .pill[data-d]').forEach(b => b.classList.toggle('on', addDays(t, -b.dataset.d) === value));
+  $(input).value = value;
+  $(input).classList.toggle('on', value !== t && value !== addDays(t, -1));
+}
+function bindDates(box, input, set) {
+  $(box).addEventListener('click', e => { const b = e.target.closest('button[data-d]'); if (b) set(addDays(today(), -b.dataset.d)); });
+  $(input).addEventListener('change', e => { if (e.target.value) set(e.target.value); });
+}
+function sizeAmount(el) { const v = el.value || el.placeholder; el.style.width = Math.max(3, v.length + 0.6) + 'ch'; }
+function cleanAmount(el) { el.value = el.value.replace(/[^\d.,]/g, '').replace(/([.,].*?)[.,]/g, '$1'); sizeAmount(el); }
 
+/* ===================== Vista AÑADIR ===================== */
 function renderAdd() {
   $$('#tipoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.tipo));
-  renderCats(); renderPagador(); renderCuentas($('#cuenta'), state.cuenta);
-  syncDate(); syncShare(); updateSave(); sizeAmount();
+  renderCats(); renderCuentaSeg(); syncDates('#dates', '#fecha', state.fecha); syncShare(); updateSave(); sizeAmount($('#importe'));
+  const ok = ingresosOk();
+  $('#presetProp').disabled = !ok;
+  $('#presetProp').title = ok ? '' : 'Indica los ingresos en el menú (tu inicial, arriba a la derecha)';
 }
-
 function renderCats() {
   $('#cats').innerHTML = state.cat.categorias.filter(c => c.tipo === state.tipo).map(c => `
     <button class="cat ${c.id === state.categoria ? 'on' : ''}" data-id="${c.id}" style="--c:${esc(c.color || '#888')}">
       <span class="ic">${esc(c.icono || '•')}</span>${esc(c.nombre)}
     </button>`).join('');
 }
-
-function pagadorOptions() {
-  const ms = [...state.cat.miembros].sort((a, b) => a.id === me().id ? -1 : b.id === me().id ? 1 : 0);
-  const opts = ms.map(m => ({ id: m.id, label: m.id === me().id ? 'Yo' : m.nombre }));
-  if (cuentaComun()) opts.push({ id: 'comun', label: 'Cuenta común' });
-  return opts;
+function renderCuentaSeg() {
+  $('#cuentaLbl').textContent = state.tipo === 'gasto' ? '¿Desde qué cuenta?' : '¿A qué cuenta?';
+  $('#cuentaSeg').innerHTML = visibles().map(c =>
+    `<button data-id="${c.id}" class="${c.id === state.cuenta ? 'on' : ''}">${esc(nombreCuenta(c))}</button>`).join('');
 }
-
-function renderPagador() {
-  $('#pagadorLbl').textContent = state.tipo === 'gasto' ? '¿Quién paga?' : '¿Quién lo recibe?';
-  $('#pagadorSeg').innerHTML = pagadorOptions().map(o =>
-    `<button data-id="${o.id}" class="${o.id === state.pagador ? 'on' : ''}">${esc(o.label)}</button>`).join('');
-}
-
-function renderCuentas(sel, value) {
-  sel.innerHTML = state.cat.cuentas.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
-  sel.value = value || '';
-}
-
-function syncDate() {
-  const t = today();
-  $$('#dates .pill[data-d]').forEach(b => b.classList.toggle('on', addDays(t, -b.dataset.d) === state.fecha));
-  $('#fecha').value = state.fecha;
-  $('#fecha').classList.toggle('on', state.fecha !== t && state.fecha !== addDays(t, -1));
-}
-
 function syncShare() {
-  const isG = state.tipo === 'gasto';
-  $('#shareBox').hidden = !isG;
-  if (!isG) return;
+  const box = $('#shareBox');
+  box.hidden = state.tipo !== 'gasto';
+  if (box.hidden) return;
   const chk = $('#compartido'), rep = $('#repartoBox'), hint = $('#shareHint');
-  if (state.pagador === 'comun') {
-    chk.checked = true; chk.disabled = true; rep.hidden = true;
-    hint.textContent = 'Sale de la cuenta común: cuenta como gasto de los dos y no genera deudas entre vosotros.';
+  const other = otro();
+  if (esComun(state.cuenta)) {
+    $('#shareRow').hidden = true; rep.hidden = true;
+    hint.textContent = 'Sale de la cuenta común: es un gasto de los dos y no genera deudas entre vosotros.';
     return;
   }
-  chk.disabled = false; chk.checked = state.compartido; rep.hidden = !state.compartido;
-  const payer = miembro(state.pagador), other = otroDe(state.pagador);
-  if (!state.compartido) {
-    hint.textContent = payer.id === me().id ? 'Gasto personal: solo cuenta para ti.' : `Gasto personal de ${payer.nombre}.`;
+  $('#shareRow').hidden = !other;
+  chk.checked = state.compartido; rep.hidden = !state.compartido || !other;
+  if (!state.compartido || !other) {
+    hint.textContent = other ? 'Gasto personal: solo cuenta para ti. Actívalo si lo has pagado tú por los dos.' : '';
     return;
   }
   $('#pct').value = state.pct;
-  $('#pctA').innerHTML = `<b>${esc(nombreCorto(payer))}</b> ${state.pct}%`;
-  $('#pctB').innerHTML = other ? `${100 - state.pct}% <b>${esc(nombreCorto(other))}</b>` : '';
-  const imp = getImporte();
-  if (!other) { hint.textContent = ''; return; }
-  const parte = money(imp * (100 - state.pct) / 100);
+  $('#pctA').innerHTML = `<b>Tú</b> ${state.pct}%`;
+  $('#pctB').innerHTML = `${100 - state.pct}% <b>${esc(other.nombre)}</b>`;
+  const prop = ingresosOk() ? Math.round(shareIngresos(me().id) * 100) : null;
+  $$('.presets button').forEach(b => b.classList.toggle('on', b.dataset.p === 'prop' ? state.pct === prop : +b.dataset.p === state.pct));
+  const imp = amountOf($('#importe'));
   hint.textContent = imp
-    ? (other.id === me().id ? `Tu parte: ${parte}. Se sumará a lo que debes.` : `Parte de ${other.nombre}: ${parte}. Se sumará a lo que te debe.`)
+    ? `Parte de ${other.nombre}: ${money(imp * (100 - state.pct) / 100)}. Se sumará a lo que te debe.`
     : `Se reparte ${state.pct}/${100 - state.pct}.`;
 }
-
 function updateSave() {
-  const imp = getImporte();
+  const imp = amountOf($('#importe'));
   $('#guardar').textContent = `Guardar ${state.tipo}${imp ? ' · ' + money(imp) : ''}`;
 }
-
-function sizeAmount() {
-  const v = $('#importe').value || $('#importe').placeholder;
-  $('#importe').style.width = Math.max(3, v.length + 0.6) + 'ch';
-}
-
 async function save() {
-  const imp = getImporte();
+  const imp = amountOf($('#importe'));
   if (!imp) { toast('Escribe un importe', 'err'); $('#importe').focus(); return; }
   if (!state.categoria) { toast('Elige una categoría', 'err'); return; }
-  const isG = state.tipo === 'gasto', comun = state.pagador === 'comun';
-  const compartido = isG && (comun || state.compartido);
+  if (!state.cuenta) { toast('Elige una cuenta', 'err'); return; }
+  const isG = state.tipo === 'gasto', isComun = esComun(state.cuenta);
+  const compartido = isG && (isComun || state.compartido);
   const row = {
-    fecha: state.fecha,
-    tipo: state.tipo,
-    importe: round2(imp),
-    categoria_id: state.categoria,
-    cuenta_id: $('#cuenta').value || null,
+    fecha: state.fecha, tipo: state.tipo, importe: round2(imp),
+    categoria_id: state.categoria, cuenta_id: state.cuenta,
     descripcion: $('#desc').value.trim() || null,
-    pagado_por: comun ? null : state.pagador,
-    ambito: comun || compartido ? 'compartido' : 'personal',
-    pct_pagador: comun ? +state.cat.hogar.reparto_defecto : compartido ? state.pct / 100 : 1,
+    pagado_por: isComun ? null : me().id,
+    ambito: compartido ? 'compartido' : 'personal',
+    pct_pagador: isComun ? +state.cat.hogar.reparto_defecto : compartido ? state.pct / 100 : 1,
     origen: 'manual',
   };
   const btn = $('#guardar'); btn.disabled = true;
   try {
-    await api.insert([row]);
+    await api.insertMov(row);
     toast(`Guardado · ${money(imp)} en ${categoria(state.categoria).nombre}`);
     $('#importe').value = ''; $('#desc').value = '';
     state.categoria = null; state.compartido = false;
-    renderCats(); syncShare(); updateSave(); sizeAmount();
+    renderCats(); syncShare(); updateSave(); sizeAmount($('#importe'));
   } catch (e) { toast(e.message, 'err'); }
   finally { btn.disabled = false; }
 }
-
 function bindAdd() {
   $('#tipoSeg').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     state.tipo = b.dataset.v; state.categoria = null; renderAdd();
   });
-  $('#importe').addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/[^\d.,]/g, '').replace(/([.,].*?)[.,]/g, '$1');
-    sizeAmount(); updateSave(); syncShare();
-  });
-  $('#dates').addEventListener('click', e => {
-    const b = e.target.closest('button[data-d]'); if (!b) return;
-    state.fecha = addDays(today(), -b.dataset.d); syncDate();
-  });
-  $('#fecha').addEventListener('change', e => { if (e.target.value) { state.fecha = e.target.value; syncDate(); } });
-  $('#cats').addEventListener('click', e => {
-    const b = e.target.closest('.cat'); if (!b) return;
-    state.categoria = b.dataset.id; renderCats();
-  });
-  $('#pagadorSeg').addEventListener('click', e => {
+  $('#importe').addEventListener('input', e => { cleanAmount(e.target); updateSave(); syncShare(); });
+  bindDates('#dates', '#fecha', v => { state.fecha = v; syncDates('#dates', '#fecha', v); });
+  $('#cats').addEventListener('click', e => { const b = e.target.closest('.cat'); if (!b) return; state.categoria = b.dataset.id; renderCats(); });
+  $('#cuentaSeg').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    state.pagador = b.dataset.id; state.cuenta = defaultCuenta(state.pagador);
-    renderPagador(); renderCuentas($('#cuenta'), state.cuenta); syncShare();
+    state.cuenta = b.dataset.id; renderCuentaSeg(); syncShare();
   });
-  $('#compartido').addEventListener('change', e => { state.compartido = e.target.checked; syncShare(); });
+  $('#compartido').addEventListener('change', e => {
+    state.compartido = e.target.checked;
+    if (state.compartido && ingresosOk()) state.pct = Math.round(shareIngresos(me().id) * 100);
+    syncShare();
+  });
   $('#pct').addEventListener('input', e => { state.pct = +e.target.value; syncShare(); });
   $$('.presets button').forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.p === 'prop') {
-      const p = miembro(state.pagador), o = otroDe(state.pagador);
-      const a = +p.ingreso_neto_mensual, c = +o.ingreso_neto_mensual;
-      state.pct = Math.round((a / (a + c)) * 100);
-    } else state.pct = +b.dataset.p;
+    state.pct = b.dataset.p === 'prop' ? Math.round(shareIngresos(me().id) * 100) : +b.dataset.p;
     syncShare();
   }));
   $('#guardar').addEventListener('click', save);
 }
 
-/* ===================== Vista MOVIMIENTOS ===================== */
-function mesLabel(s) {
-  const t = new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-  return t.charAt(0).toUpperCase() + t.slice(1);
+/* ===================== Vista APORTAR ===================== */
+function apSplit() {
+  const total = amountOf($('#apImporte'));
+  const r = state.ap.rep;
+  const pctMe = r === 'ingresos' && ingresosOk() ? shareIngresos(me().id) : r === 'manual' ? state.ap.pct / 100 : 0.5;
+  const mine = round2(total * pctMe);
+  return { total, pctMe, mine, other: round2(total - mine) };
 }
+function renderAp() {
+  const dos = state.ap.modo === 'dos', other = otro(), c = comun();
+  $$('#apModo button').forEach(b => b.classList.toggle('on', b.dataset.v === state.ap.modo));
+  $('#apModo button[data-v="dos"]').disabled = !other;
+  $('#apIntro').textContent = !c ? 'No hay cuenta común en tu hogar.'
+    : dos ? `Fijáis un total para la cuenta común. Tú registras tu parte y a ${other?.nombre || 'tu pareja'} le aparece la suya como pendiente.`
+          : 'Dinero que pasas de tu cuenta a la cuenta común.';
+  $('#apConcepto').placeholder = dos ? `Concepto (p. ej. Gastos de ${mesNombre(today())})` : 'Concepto (opcional)';
+  const mias = misCuentas();
+  $('#apDesdeBox').hidden = mias.length < 2 || (dos && !$('#apYa').checked);
+  $('#apDesde').innerHTML = mias.map(x => `<option value="${x.id}">${esc(x.nombre)}</option>`).join('');
+  $('#apDesde').value = state.ap.desde || '';
+  syncDates('#apDates', '#apFecha', state.ap.fecha);
+  sizeAmount($('#apImporte'));
+  $('#apRepBox').hidden = !dos;
+  if (dos) renderApSplit();
+  updateApSave();
+}
+function renderApSplit() {
+  const ok = ingresosOk(), other = otro();
+  if (state.ap.rep === 'ingresos' && !ok) state.ap.rep = '50_50';
+  $$('#apRepSeg button').forEach(b => { b.classList.toggle('on', b.dataset.v === state.ap.rep); if (b.dataset.v === 'ingresos') b.disabled = !ok; });
+  $('#apPctBox').hidden = state.ap.rep !== 'manual';
+  $('#apPct').value = state.ap.pct;
+  const s = apSplit();
+  $('#apPartes').innerHTML = `
+    <div class="part"><span class="n">Tú<small>${pctTxt(s.pctMe)}</small><span class="s">${$('#apYa').checked ? 'Se registra ahora desde tu cuenta' : 'Quedará pendiente para ti'}</span></span><span class="v">${money(s.mine)}</span></div>
+    <div class="part"><span class="n">${esc(other?.nombre || '—')}<small>${pctTxt(1 - s.pctMe)}</small><span class="s">Le aparecerá como pendiente para que la acepte</span></span><span class="v">${money(s.other)}</span></div>`;
+  $('#apRepHint').innerHTML = state.ap.rep === 'ingresos' ? esc(`Según ingresos: ${ingresosTxt()}.`)
+    : !ok ? `Para repartir según ingresos faltan datos. <button id="apGoIng">Indicar ingresos</button>` : '';
+}
+function updateApSave() {
+  const dos = state.ap.modo === 'dos', s = apSplit();
+  $('#apGuardar').textContent = dos
+    ? `Crear aportación${s.total ? ' · ' + money(s.total) : ''}`
+    : `Registrar aportación${s.total ? ' · ' + money(s.total) : ''}`;
+  $('#apGuardar').disabled = !comun();
+}
+async function saveAp() {
+  const c = comun(); if (!c) return toast('No hay cuenta común', 'err');
+  const s = apSplit();
+  if (!s.total) { toast('Escribe un importe', 'err'); $('#apImporte').focus(); return; }
+  const desde = $('#apDesde').value || state.ap.desde;
+  const concepto = $('#apConcepto').value.trim();
+  const btn = $('#apGuardar'); btn.disabled = true;
+  try {
+    if (state.ap.modo === 'yo') {
+      if (!desde) throw new Error('No encuentro tu cuenta personal');
+      await api.insertTransfer({ fecha: state.ap.fecha, de_cuenta: desde, a_cuenta: c.id, importe: round2(s.total), miembro_id: me().id, nota: concepto || null });
+      toast(`Aportación registrada · ${money(s.total)}`);
+    } else {
+      const other = otro(), ya = $('#apYa').checked;
+      if (ya && !desde) throw new Error('No encuentro tu cuenta personal');
+      await api.crearAportacion({
+        total: round2(s.total), cuenta_destino: c.id, modo: state.ap.rep, concepto: concepto || `Aportación ${mesNombre(state.ap.fecha)}`,
+        fecha: state.ap.fecha, mi_cuenta: ya ? desde : null,
+        partes: [
+          { miembro_id: me().id, pct: round2(s.pctMe * 10000) / 10000, importe: s.mine },
+          { miembro_id: other.id, pct: round2((1 - s.pctMe) * 10000) / 10000, importe: s.other },
+        ],
+      });
+      toast(`Aportación creada · ${other.nombre} tiene ${money(s.other)} pendiente`);
+    }
+    $('#apImporte').value = ''; $('#apConcepto').value = '';
+    renderAp(); refreshAps();
+  } catch (e) { toast(e.message, 'err'); }
+  finally { btn.disabled = !comun(); }
+}
+
+async function refreshAps() {
+  try { state.aps = await api.aportaciones(); } catch { state.aps = []; }
+  renderApList();
+  $('#apDot').hidden = !myPending().length;
+}
+function myPending() {
+  return state.aps.flatMap(a => (a.aportacion_partes || [])
+    .filter(p => p.miembro_id === me().id && p.estado === 'pendiente').map(p => ({ a, p })));
+}
+function renderApList() {
+  const list = state.aps.filter(a => (a.aportacion_partes || []).length).slice(0, 6);
+  $('#apListLbl').hidden = !list.length;
+  $('#apList').innerHTML = list.map(a => {
+    const partes = [...a.aportacion_partes].sort((x, y) => x.miembro_id === me().id ? -1 : y.miembro_id === me().id ? 1 : 0);
+    const pend = partes.filter(p => p.estado === 'pendiente');
+    const mia = partes.find(p => p.miembro_id === me().id && p.estado === 'pendiente');
+    const creador = miembro(a.creada_por);
+    return `<div class="apc">
+      <div class="row"><div style="min-width:0"><div class="t">${esc(a.concepto || 'Aportación')}</div>
+        <div class="s">${money(a.total)} · ${creador ? 'propuesta por ' + esc(nombreCorto(creador).replace('Tú', 'ti')) : ''} · ${esc(fechaCorta(a.fecha))}</div></div>
+        <span class="badge ${pend.length ? 'warn' : ''}">${pend.length ? 'Pendiente' : 'Completada'}</span></div>
+      ${partes.map(p => `<div class="aprow"><span>${esc(nombreCorto(miembro(p.miembro_id)))} · ${pctTxt(+p.pct)}</span>
+        <span>${money(+p.importe)} · ${p.estado === 'hecha' ? '<span class="ok">✓ hecha</span>' : '<span class="pend">pendiente</span>'}</span></div>`).join('')}
+      ${mia || (pend.length && a.creada_por === me().id) ? `<div class="apacts">
+        ${pend.length && a.creada_por === me().id ? `<button class="ghost" data-cancel="${a.id}">Cancelar</button>` : ''}
+        ${mia ? `<button class="small" data-reg="${mia.id}">Registrar mi parte</button>` : ''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ===================== Modales ===================== */
+function openModal(html) { $('#sheet').innerHTML = html; $('#modal').hidden = false; }
+function closeModal() { $('#modal').hidden = true; state.modalCtx = null; }
+
+function maybePopup() {
+  if (!$('#modal').hidden || !state.started) return;
+  const x = myPending().find(x => !state.dismissed.has(x.p.id));
+  if (x) openPendiente(x);
+}
+function openPendiente({ a, p }) {
+  state.modalCtx = { kind: 'parte', a, p };
+  const creador = miembro(a.creada_por);
+  const modo = a.modo === 'ingresos' ? 'según ingresos' : a.modo === '50_50' ? 'a partes iguales' : 'reparto a mano';
+  const otros = (a.aportacion_partes || []).filter(x => x.id !== p.id);
+  const mias = misCuentas();
+  openModal(`
+    <div class="mh">Aportación pendiente</div>
+    <p class="mp"><b>${esc(creador ? (creador.id === me().id ? 'Tú' : creador.nombre) : 'Alguien')}</b> ${creador?.id === me().id ? 'propusiste' : 'propone'} aportar <b>${money(a.total)}</b> a la ${esc(nombreCuenta(cuenta(a.cuenta_destino)).toLowerCase())}${a.concepto ? ` · ${esc(a.concepto)}` : ''}.</p>
+    <div class="mbig">${money(+p.importe)}</div>
+    <p class="mp">Tu parte: ${pctTxt(+p.pct)}, ${modo}.${otros.map(o => ` ${esc(nombreCorto(miembro(o.miembro_id)))}: ${money(+o.importe)} ${o.estado === 'hecha' ? '✓' : '(pendiente)'}.`).join('')}</p>
+    <label class="fl" for="mImporte">Importe que transfieres</label>
+    <div class="inp"><input class="field" id="mImporte" inputmode="decimal" value="${esc(fmtInput(+p.importe))}"><i>€</i></div>
+    ${mias.length > 1 ? `<label class="fl" for="mDesde">Desde</label><select class="field" id="mDesde">${mias.map(x => `<option value="${x.id}">${esc(x.nombre)}</option>`).join('')}</select>` : ''}
+    <label class="fl" for="mFecha">Fecha</label>
+    <input class="field" type="date" id="mFecha" value="${today()}">
+    <div class="mbtns">
+      <button class="primary" data-m="accept">Aceptar y registrar</button>
+      <button class="ghost" data-m="later">Más tarde</button>
+    </div>`);
+}
+function openIngresos() {
+  state.modalCtx = { kind: 'ingresos' };
+  const mine = +me().ingreso_neto_mensual || '', other = otro();
+  const ox = other && state.ingresos[other.id];
+  openModal(`
+    <div class="mh">Mis ingresos</div>
+    <p class="mp">Se usan para repartir gastos y aportaciones según ingresos. Cada uno indica el suyo desde su móvil.</p>
+    <label class="fl" for="mIng">Tu ingreso neto mensual</label>
+    <div class="inp"><input class="field" id="mIng" inputmode="decimal" placeholder="0" value="${esc(fmtInput(mine))}"><i>€</i></div>
+    ${other ? `<p class="mp" style="margin-top:12px">${esc(other.nombre)}: <b>${ox?.v ? money0(ox.v) : 'sin indicar'}</b>${ox?.src === 'media' ? ' (media de sus ingresos de 3 meses)' : ''}</p>` : ''}
+    <div class="mbtns">
+      <button class="primary" data-m="saveIng">Guardar</button>
+      <button class="ghost" data-m="close">Cerrar</button>
+    </div>`);
+}
+function bindModal() {
+  $('#modal').addEventListener('click', async e => {
+    if (e.target.id === 'modal') { if (state.modalCtx?.kind === 'parte') state.dismissed.add(state.modalCtx.p.id); return closeModal(); }
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    const ctx = state.modalCtx;
+    if (b.dataset.m === 'close') return closeModal();
+    if (b.dataset.m === 'later') { state.dismissed.add(ctx.p.id); return closeModal(); }
+    if (b.dataset.m === 'accept') {
+      const imp = amountOf($('#mImporte'));
+      if (!imp) return toast('Escribe el importe', 'err');
+      const desde = $('#mDesde')?.value || misCuentas()[0]?.id;
+      if (!desde) return toast('No encuentro tu cuenta personal', 'err');
+      b.disabled = true;
+      try {
+        await api.registrarParte(ctx.p.id, round2(imp), desde, $('#mFecha').value || today());
+        closeModal(); toast(`Registrado · ${money(imp)} a la cuenta común`);
+        await refreshAps();
+        if (state.tab === 'list') loadList();
+        maybePopup();
+      } catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }
+    if (b.dataset.m === 'saveIng') {
+      const raw = $('#mIng').value.trim(), v = raw ? amountOf($('#mIng')) : null;
+      b.disabled = true;
+      try {
+        await api.updateIngreso(v);
+        me().ingreso_neto_mensual = v;
+        const mm = miembro(me().id); if (mm) mm.ingreso_neto_mensual = v;
+        await loadIngresos();
+        closeModal(); toast('Ingresos guardados');
+        renderAdd(); renderAp();
+      } catch (err) { toast(err.message, 'err'); b.disabled = false; }
+    }
+  });
+}
+
+function bindAp() {
+  $('#apModo').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    state.ap.modo = b.dataset.v;
+    if (state.ap.modo === 'dos' && ingresosOk()) state.ap.rep = 'ingresos';
+    renderAp();
+  });
+  $('#apImporte').addEventListener('input', e => { cleanAmount(e.target); if (state.ap.modo === 'dos') renderApSplit(); updateApSave(); });
+  bindDates('#apDates', '#apFecha', v => { state.ap.fecha = v; syncDates('#apDates', '#apFecha', v); });
+  $('#apDesde').addEventListener('change', e => state.ap.desde = e.target.value);
+  $('#apRepSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.v === 'manual' && state.ap.rep !== 'manual') state.ap.pct = Math.round(apSplit().pctMe * 100);
+    state.ap.rep = b.dataset.v; renderApSplit();
+  });
+  $('#apPct').addEventListener('input', e => { state.ap.pct = +e.target.value; renderApSplit(); });
+  $('#apYa').addEventListener('change', () => renderAp());
+  $('#apRepBox').addEventListener('click', e => { if (e.target.id === 'apGoIng') openIngresos(); });
+  $('#apList').addEventListener('click', async e => {
+    const reg = e.target.closest('[data-reg]'), can = e.target.closest('[data-cancel]');
+    if (reg) { const x = myPending().find(x => x.p.id === reg.dataset.reg); if (x) openPendiente(x); }
+    if (can) {
+      try { await api.cancelarAportacion(can.dataset.cancel); toast('Aportación cancelada'); refreshAps(); }
+      catch (err) { toast(err.message, 'err'); }
+    }
+  });
+  $('#apGuardar').addEventListener('click', saveAp);
+}
+
+/* ===================== Vista MOVIMIENTOS ===================== */
+function mesLabel(s) { const t = new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); }
 function dayLabel(s) {
   const t = today();
   if (s === t) return 'Hoy';
   if (s === addDays(t, -1)) return 'Ayer';
   return new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
 }
-
 async function loadList() {
   $('#mesLabel').textContent = mesLabel(state.mes);
   $('#nextMes').disabled = state.mes >= monthStart(today());
   $('#lista').innerHTML = '<div class="empty">Cargando…</div>';
   try {
-    const [movs, bal] = await Promise.all([api.listMovs(state.mes, addMonths(state.mes, 1)), api.balance()]);
-    state.movs = movs.map(m => ({ ...m, importe: +m.importe, pct_pagador: +m.pct_pagador }));
+    const desde = state.mes, hasta = addMonths(state.mes, 1);
+    const [movs, trs, bal] = await Promise.all([api.listMovs(desde, hasta), api.listTrs(desde, hasta), api.balance()]);
+    const vis = new Set(visibles().map(c => c.id));
+    state.movs = movs.map(m => ({ ...m, importe: +m.importe, pct_pagador: +m.pct_pagador }))
+      .filter(m => vis.has(m.cuenta_id) || (!m.cuenta_id && m.pagado_por === me().id));
+    state.trs = trs.map(t => ({ ...t, importe: +t.importe })).filter(t => vis.has(t.de_cuenta) || vis.has(t.a_cuenta));
     state.bal = bal;
     renderList();
   } catch (e) { $('#lista').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
 }
-
 function renderList() {
-  const movs = state.movs;
-  const gastos = movs.filter(m => m.tipo === 'gasto').reduce((s, m) => s + m.importe, 0);
-  const ingresos = movs.filter(m => m.tipo === 'ingreso').reduce((s, m) => s + m.importe, 0);
+  const gastos = state.movs.filter(m => m.tipo === 'gasto').reduce((s, m) => s + m.importe, 0);
+  const ingresos = state.movs.filter(m => m.tipo === 'ingreso').reduce((s, m) => s + m.importe, 0);
+  const c = comun();
+  const aportado = state.trs.filter(t => t.miembro_id === me().id && c && t.a_cuenta === c.id).reduce((s, t) => s + t.importe, 0);
   $('#stats').innerHTML = `
     <div class="stat"><div class="k">Gastos</div><div class="v">${money(gastos)}</div></div>
     <div class="stat"><div class="k">Ingresos</div><div class="v" style="color:var(--ingreso)">${money(ingresos)}</div></div>
-    <div class="stat"><div class="k">Ahorro</div><div class="v">${money(ingresos - gastos)}</div></div>`;
+    <div class="stat"><div class="k">Aportado a común</div><div class="v">${money(aportado)}</div></div>`;
+  $('#scope').textContent = `Solo ${visibles().map(x => nombreCuenta(x).toLowerCase()).join(' y ')}.`;
 
-  const mine = state.bal.find(b => b.miembro_id === me().id), other = otroDe(me().id);
+  const mine = state.bal.find(b => b.miembro_id === me().id), other = otro();
   const bx = $('#balance');
-  if (mine && other) {
+  if (mine && other && Math.abs(+mine.saldo) >= 0.005) {
     const s = +mine.saldo;
-    const big = Math.abs(s) < 0.005 ? 'Estáis en paz' : s > 0 ? `${other.nombre} te debe ${money(s)}` : `Debes ${money(-s)} a ${other.nombre}`;
-    bx.innerHTML = `<span class="dot">⇄</span><div><div class="big">${esc(big)}</div><div class="sm">Gastos compartidos pagados desde cuentas personales (acumulado).</div></div>`;
+    const big = s > 0 ? `${other.nombre} te debe ${money(s)}` : `Debes ${money(-s)} a ${other.nombre}`;
+    bx.innerHTML = `<span class="bdot">⇄</span><div><div class="big">${esc(big)}</div><div class="sm">Por gastos compartidos pagados desde cuentas personales.</div></div>`;
     bx.hidden = false;
   } else bx.hidden = true;
 
-  if (!movs.length) { $('#lista').innerHTML = '<div class="empty">Sin movimientos este mes.</div>'; return; }
+  const items = [...state.movs.map(m => ({ ...m, k: 'm' })), ...state.trs.map(t => ({ ...t, k: 't' }))];
+  if (!items.length) { $('#lista').innerHTML = '<div class="empty">Sin movimientos este mes.</div>'; return; }
   const byDay = {};
-  movs.forEach(m => (byDay[m.fecha] ||= []).push(m));
+  items.forEach(m => (byDay[m.fecha] ||= []).push(m));
   $('#lista').innerHTML = Object.keys(byDay).sort().reverse().map(d => {
-    const list = byDay[d];
-    const tot = list.reduce((s, m) => s + (m.tipo === 'gasto' ? -m.importe : m.importe), 0);
-    return `<div class="day"><span>${esc(dayLabel(d))}</span><span class="num">${money(tot)}</span></div>
+    const list = byDay[d].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    const tot = list.filter(m => m.k === 'm').reduce((s, m) => s + (m.tipo === 'gasto' ? -m.importe : m.importe), 0);
+    return `<div class="day"><span>${esc(dayLabel(d))}</span><span>${money(tot)}</span></div>
       <div class="items">${list.map(itemHTML).join('')}</div>`;
   }).join('');
 }
-
 function itemHTML(m) {
-  const c = categoria(m.categoria_id) || { nombre: 'Sin categoría', icono: '❔', color: '#999' };
-  const quien = m.pagado_por ? nombreCorto(miembro(m.pagado_por)) : 'Común';
-  const pct = Math.round(m.pct_pagador * 100);
-  const badge = m.tipo === 'gasto' && m.ambito === 'compartido'
-    ? `<span class="badge">${m.pagado_por ? `Compartido ${pct}/${100 - pct}` : 'Común'}</span>` : '';
-  const sub = `${c.nombre} · ${quien}`;
+  const key = m.k + ':' + m.id;
+  let ic, color, title, sub, badge = '', amt;
+  if (m.k === 't') {
+    const de = cuenta(m.de_cuenta), a = cuenta(m.a_cuenta);
+    ic = '⇄'; color = '#0F6B5F';
+    title = m.nota || `Aportación a ${nombreCuenta(a).toLowerCase()}`;
+    sub = `${nombreCuenta(de)} → ${nombreCuenta(a)} · ${nombreCorto(miembro(m.miembro_id))}`;
+    badge = '<span class="badge">Aportación</span>';
+    amt = `<span class="amt">${money(m.importe)}</span>`;
+  } else {
+    const c = categoria(m.categoria_id) || { nombre: 'Sin categoría', icono: '❔', color: '#999' };
+    ic = c.icono; color = c.color; title = m.descripcion || c.nombre;
+    sub = `${c.nombre} · ${nombreCuenta(cuenta(m.cuenta_id))}${m.pagado_por && m.pagado_por !== me().id ? ' · ' + miembro(m.pagado_por)?.nombre : ''}`;
+    if (m.tipo === 'gasto' && m.ambito === 'compartido') {
+      const p = Math.round(m.pct_pagador * 100);
+      badge = `<span class="badge">${m.pagado_por ? `Compartido ${p}/${100 - p}` : 'Común'}</span>`;
+    }
+    amt = `<span class="amt ${m.tipo}">${m.tipo === 'gasto' ? '−' : '+'}${money(m.importe)}</span>`;
+  }
   return `<div class="iw">
-    <button class="item" data-id="${m.id}">
-      <span class="ic" style="--c:${esc(c.color)}">${esc(c.icono)}</span>
-      <span class="main"><span class="t">${esc(m.descripcion || c.nombre)}</span><span class="s">${esc(sub)} ${badge}</span></span>
-      <span class="amt ${m.tipo}">${m.tipo === 'gasto' ? '−' : '+'}${money(m.importe)}</span>
+    <button class="item" data-key="${key}">
+      <span class="ic" style="--c:${esc(color)}">${esc(ic)}</span>
+      <span class="main"><span class="t">${esc(title)}</span><span class="s">${esc(sub)} ${badge}</span></span>
+      ${amt}
     </button>
-    ${state.openId === m.id ? `<div class="acts"><button class="ghost" data-act="close">Cancelar</button><button class="danger" data-act="del" data-id="${m.id}">Eliminar</button></div>` : ''}
+    ${state.openId === key ? `<div class="acts"><button class="ghost" data-act="close">Cancelar</button><button class="danger" data-act="del" data-key="${key}">Eliminar</button></div>` : ''}
   </div>`;
 }
-
 function bindList() {
   $('#prevMes').addEventListener('click', () => { state.mes = addMonths(state.mes, -1); state.openId = null; loadList(); });
   $('#nextMes').addEventListener('click', () => { state.mes = addMonths(state.mes, 1); state.openId = null; loadList(); });
@@ -907,200 +1174,33 @@ function bindList() {
     const act = e.target.closest('[data-act]');
     if (act?.dataset.act === 'close') { state.openId = null; return renderList(); }
     if (act?.dataset.act === 'del') {
-      try { await api.remove(act.dataset.id); state.openId = null; toast('Movimiento eliminado'); loadList(); }
-      catch (err) { toast(err.message, 'err'); }
+      const [k, id] = act.dataset.key.split(':');
+      try {
+        if (k === 't') await api.removeTrs(id); else await api.removeMov(id);
+        state.openId = null; toast(k === 't' ? 'Aportación eliminada' : 'Movimiento eliminado');
+        loadList(); if (k === 't') refreshAps();
+      } catch (err) { toast(err.message, 'err'); }
       return;
     }
     const it = e.target.closest('.item');
-    if (it) { state.openId = state.openId === it.dataset.id ? null : it.dataset.id; renderList(); }
+    if (it) { state.openId = state.openId === it.dataset.key ? null : it.dataset.key; renderList(); }
   });
-}
-
-/* ===================== Vista IMPORTAR ===================== */
-function fillImportSelects() {
-  const sel = $('#impPagador');
-  sel.innerHTML = pagadorOptions().map(o => `<option value="${o.id}">${esc(o.label)}</option>`).join('');
-  sel.value = me().id;
-  renderCuentas($('#impCuenta'), defaultCuenta(me().id));
-}
-
-function handleText(text, name) {
-  const rows = parseCSV(text);
-  if (rows.length < 2) return toast('No he encontrado filas en el archivo', 'err');
-  const h = findHeader(rows);
-  const header = rows[h];
-  const data = rows.slice(h + 1).filter(r => r.length >= Math.min(3, header.length));
-  state.imp = { name, header, data, map: autoMap(header), invert: false, items: [] };
-  $('#impInvert').checked = false;
-  $('#impName').textContent = name;
-  $('#impStart').hidden = true; $('#impWork').hidden = false;
-  renderMap(); buildPreview();
-}
-
-function renderMap() {
-  const { header, map } = state.imp;
-  const opts = v => header.map((h, i) => `<option value="${i}" ${i === v ? 'selected' : ''}>${esc(h || 'Columna ' + (i + 1))}</option>`).join('');
-  $('#impMap').innerHTML = ['fecha', 'concepto', 'importe'].map(k => `
-    <div><label class="fl">${k.charAt(0).toUpperCase() + k.slice(1)}</label>
-    <select class="field" data-k="${k}">${opts(map[k])}</select></div>`).join('');
-}
-
-function buildPreview() {
-  const { data, map } = state.imp;
-  const invert = $('#impInvert').checked, allShared = $('#impCompartido').checked;
-  const seen = {}, items = [];
-  for (const r of data) {
-    const fecha = parseFecha(r[map.fecha]);
-    let raw = parseImporte(r[map.importe]);
-    if (!fecha || !isFinite(raw) || raw === 0) continue;
-    if (invert) raw = -raw;
-    const desc = String(r[map.concepto] || '').replace(/\s+/g, ' ').trim();
-    const tipo = raw < 0 ? 'gasto' : 'ingreso';
-    const regla = matchRegla(desc, tipo);
-    const base = `${fecha}|${raw.toFixed(2)}|${norm(desc).slice(0, 80)}`;
-    seen[base] = (seen[base] || 0) + 1;
-    items.push({
-      fecha, desc, tipo, importe: Math.abs(raw),
-      categoria_id: regla?.categoria_id || '',
-      compartido: tipo === 'gasto' && (allShared || regla?.ambito === 'compartido'),
-      incluir: true, hash: `${base}#${seen[base]}`,
-    });
-  }
-  items.sort((a, b) => b.fecha.localeCompare(a.fecha));
-  state.imp.items = items;
-  renderPreview();
-}
-
-function renderPreview() {
-  const items = state.imp.items;
-  if (!items.length) {
-    $('#impSummary').innerHTML = '';
-    $('#impList').innerHTML = '<div class="empty">No encuentro movimientos con estas columnas. Prueba a cambiar la asignación.</div>';
-    $('#impBar').hidden = true; return;
-  }
-  $('#impList').innerHTML = items.map((it, i) => {
-    const cats = state.cat.categorias.filter(c => c.tipo === it.tipo);
-    return `<div class="prow ${it.incluir ? '' : 'off'}" data-i="${i}">
-      <input type="checkbox" data-f="incluir" ${it.incluir ? 'checked' : ''} aria-label="Incluir">
-      <div class="pmain">
-        <div class="pt">${esc(it.desc || '(sin concepto)')}</div>
-        <div class="ps">
-          <span>${esc(dayLabel(it.fecha))}</span>
-          <select class="mini ${it.categoria_id ? '' : 'warn'}" data-f="categoria_id">
-            <option value="">Sin categoría</option>
-            ${cats.map(c => `<option value="${c.id}" ${c.id === it.categoria_id ? 'selected' : ''}>${esc(c.icono)} ${esc(c.nombre)}</option>`).join('')}
-          </select>
-          ${it.tipo === 'gasto' ? `<label class="minisw"><input type="checkbox" data-f="compartido" ${it.compartido ? 'checked' : ''}>Compartido</label>` : ''}
-        </div>
-      </div>
-      <span class="amt ${it.tipo}">${it.tipo === 'gasto' ? '−' : '+'}${money(it.importe)}</span>
-    </div>`;
-  }).join('');
-  updateImportSummary();
-}
-
-function updateImportSummary() {
-  const items = state.imp.items, sel = items.filter(i => i.incluir);
-  const auto = sel.filter(i => i.categoria_id).length;
-  $('#impSummary').innerHTML = `<span><b>${sel.length}</b> de ${items.length} seleccionados</span><span><b>${auto}</b> categorizados</span>`;
-  $('#impBtn').textContent = `Importar ${sel.length} movimiento${sel.length === 1 ? '' : 's'}`;
-  $('#impBtn').disabled = !sel.length;
-  $('#impBar').hidden = state.tab !== 'import';
-  document.body.dataset.tab = 'add';
-}
-
-function resetImport() {
-  state.imp = null;
-  $('#impFile').value = '';
-  $('#impStart').hidden = false; $('#impWork').hidden = true; $('#impBar').hidden = true;
-  document.body.dataset.tab = 'import';
-}
-
-async function doImport() {
-  const sel = state.imp.items.filter(i => i.incluir);
-  if (!sel.length) return;
-  const pag = $('#impPagador').value, comun = pag === 'comun';
-  const cuenta = $('#impCuenta').value || null;
-  const pctDef = +state.cat.hogar.reparto_defecto;
-  const rows = sel.map(it => {
-    const compartido = it.tipo === 'gasto' && (comun || it.compartido);
-    return {
-      fecha: it.fecha, tipo: it.tipo, importe: round2(it.importe),
-      categoria_id: it.categoria_id || null, cuenta_id: cuenta, descripcion: it.desc || null,
-      pagado_por: comun ? null : pag,
-      ambito: comun || compartido ? 'compartido' : 'personal',
-      pct_pagador: comun || compartido ? pctDef : 1,
-      origen: 'csv', import_hash: it.hash,
-    };
-  });
-  const btn = $('#impBtn'); btn.disabled = true;
-  try {
-    const { inserted, skipped } = await api.insert(rows);
-    toast(`${inserted} importados${skipped ? ` · ${skipped} ya existían` : ''}`);
-    resetImport();
-  } catch (e) { toast(e.message, 'err'); btn.disabled = false; }
-}
-
-function sampleCSV() {
-  const d = n => { const x = new Date(); x.setDate(x.getDate() - n); return `${pad(x.getDate())}/${pad(x.getMonth() + 1)}/${x.getFullYear()}`; };
-  const rows = [
-    [0, 'COMPRA TARJ. MERCADONA LEIOA', '-54,32'], [0, 'BIZKAIBUS RECARGA', '-20,00'],
-    [1, 'COMPRA TARJ. BAR TXOKO', '-14,50'], [1, 'RECIBO IBERDROLA CLIENTES SAU', '-61,87'],
-    [2, 'NETFLIX.COM', '-13,99'], [3, 'COMPRA TARJ. EROSKI CITY', '-23,15'],
-    [4, 'TRANSF. NOMINA', '2.100,00'], [5, 'COMPRA TARJ. IKEA BARAKALDO', '-189,90'],
-    [6, 'GLOVO APP', '-21,40'], [7, 'RECIBO VODAFONE ESPAÑA', '-35,00'],
-    [8, 'COMPRA FARMACIA SAN IGNACIO', '-8,75'], [9, 'BIZUM ENVIADO LAURA', '-15,00'],
-  ];
-  let saldo = 3150.42;
-  const lines = rows.map(([n, c, imp]) => { saldo += parseImporte(imp); return `${d(n)};${d(n)};${c};${imp};${saldo.toFixed(2).replace('.', ',')}`; });
-  return ['Movimientos de la cuenta;;;;', 'Titular: ********;;;;', '', 'Fecha operación;Fecha valor;Concepto;Importe;Saldo', ...lines].join('\n');
-}
-
-function bindImport() {
-  $('#impFile').addEventListener('change', async e => {
-    const f = e.target.files[0]; if (!f) return;
-    try { handleText(await readFile(f), f.name); } catch (err) { toast('No he podido leer el archivo', 'err'); }
-  });
-  $('#impSample').addEventListener('click', () => handleText(sampleCSV(), 'movimientos_ejemplo.csv'));
-  $('#impReset').addEventListener('click', resetImport);
-  $('#impMap').addEventListener('change', e => {
-    const k = e.target.dataset.k; if (!k) return;
-    state.imp.map[k] = +e.target.value; buildPreview();
-  });
-  $('#impInvert').addEventListener('change', () => state.imp && buildPreview());
-  $('#impCompartido').addEventListener('change', e => {
-    if (!state.imp) return;
-    state.imp.items.forEach(i => { if (i.tipo === 'gasto') i.compartido = e.target.checked; });
-    renderPreview();
-  });
-  $('#impPagador').addEventListener('change', e => renderCuentas($('#impCuenta'), defaultCuenta(e.target.value)));
-  $('#impList').addEventListener('change', e => {
-    const f = e.target.dataset.f, row = e.target.closest('.prow'); if (!f || !row) return;
-    const it = state.imp.items[+row.dataset.i];
-    if (f === 'categoria_id') { it.categoria_id = e.target.value; e.target.classList.toggle('warn', !it.categoria_id); }
-    else { it[f] = e.target.checked; if (f === 'incluir') row.classList.toggle('off', !it.incluir); }
-    updateImportSummary();
-  });
-  $('#impBtn').addEventListener('click', doImport);
 }
 
 /* ===================== General ===================== */
 function bindGeneral() {
   $('#tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) go(b.dataset.tab); });
   $('#avatar').addEventListener('click', e => { e.stopPropagation(); $('#menu').hidden = !$('#menu').hidden; });
-  document.addEventListener('click', () => $('#menu').hidden = true);
+  document.addEventListener('click', e => { if (!e.target.closest('#menu')) $('#menu').hidden = true; });
+  $('#menuIngresos').addEventListener('click', () => { $('#menu').hidden = true; openIngresos(); });
   $('#logout').addEventListener('click', () => api.signOut());
-  $('#loginBtn').addEventListener('click', async () => {
-    const email = $('#loginEmail').value.trim();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return toast('Escribe un email válido', 'err');
-    $('#loginBtn').disabled = true;
-    try { await api.signIn(email); $('#loginMsg').textContent = `Te hemos enviado un enlace a ${email}. Ábrelo en este dispositivo.`; }
-    catch (e) { $('#loginMsg').textContent = 'No se pudo enviar el enlace: ' + e.message; }
-    finally { $('#loginBtn').disabled = false; }
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState !== 'visible' || !state.started) return;
+    await refreshAps(); maybePopup();
   });
 }
 
-bindGeneral(); bindAdd(); bindList(); bindImport();
+bindGeneral(); bindLogin(); bindAdd(); bindAp(); bindList(); bindModal();
 boot();
 </script>
 </body>
