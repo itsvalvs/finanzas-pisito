@@ -216,7 +216,7 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
       <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
       <div class="menu" id="menu" hidden>
         <div class="em" id="menuEmail"></div>
-        <button id="menuIngresos">Mis ingresos</button>
+        <button id="menuIngresos">Sueldos anuales</button>
         <a href="reporting.html">Ver informe</a>
         <button id="logout">Cerrar sesión</button>
       </div>
@@ -344,6 +344,10 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 
   <!-- MOVIMIENTOS -->
   <section id="view-list" hidden>
+    <div class="seg" id="listSeg" style="margin-bottom:10px">
+      <button data-v="mia" class="on">Mi cuenta</button>
+      <button data-v="comun">Cuenta común</button>
+    </div>
     <div class="monthnav">
       <button id="prevMes" aria-label="Mes anterior">‹</button>
       <strong id="mesLabel"></strong>
@@ -458,8 +462,8 @@ function demoApi() {
   const now = () => new Date(Date.now() + seq).toISOString();
   const hogar = { id: 'h1', nombre: 'Casa · demo', reparto_defecto: 0.5 };
   const miembros = [
-    { id: 'm1', hogar_id: 'h1', user_id: 'u1', nombre: 'Valvanuz', ingreso_neto_mensual: 2100 },
-    { id: 'm2', hogar_id: 'h1', user_id: 'u2', nombre: 'Fran',     ingreso_neto_mensual: 1700 },
+    { id: 'm1', hogar_id: 'h1', user_id: 'u1', nombre: 'Valvanuz', ingreso_neto_anual: 29400 },
+    { id: 'm2', hogar_id: 'h1', user_id: 'u2', nombre: 'Fran',     ingreso_neto_anual: 23800 },
   ];
   const categorias = BASE_CATEGORIAS.map((c, i) => ({ ...c, id: 'c' + i }));
   const catId = n => categorias.find(c => c.nombre === n)?.id;
@@ -533,8 +537,7 @@ function demoApi() {
       throw new Error('Aportación no encontrada');
     },
     async cancelarAportacion(id) { aps = aps.filter(a => a.id !== id); trs.forEach(x => { if (x.aportacion_id === id) x.aportacion_id = null; }); },
-    async ingresosMedios() { return []; },
-    async updateIngreso(v) { miembros[0].ingreso_neto_mensual = v; },
+    async setIngresoAnual(id, v) { const m = miembros.find(x => x.id === id); if (m) m.ingreso_neto_anual = v; },
     async balance() { return calcBalance(movs, miembros); },
   };
 }
@@ -598,11 +601,7 @@ function supaApi() {
       return ok(await sb.rpc('registrar_parte', { p_parte: id, p_importe: importe, p_de_cuenta: de, p_fecha: fecha }));
     },
     async cancelarAportacion(id) { ok(await sb.from('aportaciones').delete().eq('id', id)); },
-    async ingresosMedios(desde, hasta) {
-      return ok(await sb.from('movimientos').select('pagado_por,importe').eq('hogar_id', hogarId)
-        .eq('tipo', 'ingreso').gte('fecha', desde).lt('fecha', hasta));
-    },
-    async updateIngreso(v) { ok(await sb.from('miembros').update({ ingreso_neto_mensual: v }).eq('id', meId)); },
+    async setIngresoAnual(id, v) { ok(await sb.rpc('set_ingreso_anual', { p_miembro: id, p_valor: v })); },
     async balance() { return ok(await sb.from('v_balance_pareja').select('*').eq('hogar_id', hogarId)); },
   };
 }
@@ -614,7 +613,7 @@ const state = {
   tipo: 'gasto', categoria: null, cuenta: null, compartido: false, pct: 50, fecha: today(),
   ap: { modo: 'yo', fecha: today(), rep: 'ingresos', pct: 50, desde: null },
   mes: monthStart(today()), movs: [], trs: [], bal: [], openId: null,
-  aps: [], ingresos: {}, dismissed: new Set(), loginEmail: '',
+  aps: [], ingresos: {}, dismissed: new Set(), loginEmail: '', listView: lsGet('fin_list') === 'comun' ? 'comun' : 'mia', afterIng: null,
 };
 const TITLES = { add: 'Nuevo movimiento', aportar: 'Aportar a la común', list: 'Movimientos' };
 
@@ -637,30 +636,15 @@ function toast(msg, kind = '') {
   clearTimeout(toast._t); toast._t = setTimeout(() => t.className = 'toast', 2800);
 }
 
-/* ===================== Ingresos (para repartir según ingresos) ===================== */
+/* ===================== Sueldos netos anuales (para repartir según ingresos) ===================== */
 async function loadIngresos() {
-  const ms = state.cat.miembros, avg = {};
-  if (ms.some(m => !(+m.ingreso_neto_mensual > 0))) {
-    const cur = monthStart(today());
-    try {
-      const rows = await api.ingresosMedios(addMonths(cur, -3), cur);
-      rows.forEach(r => { if (r.pagado_por) avg[r.pagado_por] = (avg[r.pagado_por] || 0) + (+r.importe) / 3; });
-    } catch {}
-  }
-  state.ingresos = Object.fromEntries(ms.map(m => {
-    const v = +m.ingreso_neto_mensual;
-    return [m.id, v > 0 ? { v, src: 'perfil' } : avg[m.id] > 0 ? { v: round2(avg[m.id]), src: 'media' } : { v: 0, src: null }];
-  }));
+  state.ingresos = Object.fromEntries(state.cat.miembros.map(m => [m.id, +m.ingreso_neto_anual > 0 ? +m.ingreso_neto_anual : 0]));
 }
-const ingresosOk = () => state.cat.miembros.length === 2 && state.cat.miembros.every(m => state.ingresos[m.id]?.v > 0);
-const shareIngresos = id => { const a = state.ingresos[id].v, b = state.ingresos[otroDe(id).id].v; return a / (a + b); };
-function ingresosTxt() {
-  const parts = [me(), otro()].filter(Boolean).map(m => {
-    const x = state.ingresos[m.id];
-    return `${nombreCorto(m)} ${x?.v ? money0(x.v) + (x.src === 'media' ? ' (media 3 meses)' : '') : 'sin indicar'}`;
-  });
-  return parts.join(' · ');
-}
+const ingresosOk = () => state.cat.miembros.length === 2 && state.cat.miembros.every(m => state.ingresos[m.id] > 0);
+const shareIngresos = id => { const a = state.ingresos[id], b = state.ingresos[otroDe(id).id]; return a / (a + b); };
+const ingresosTxt = () => [me(), otro()].filter(Boolean).map(m => `${nombreCorto(m)} ${state.ingresos[m.id] ? money0(state.ingresos[m.id]) : 'sin indicar'}`).join(' · ');
+/* Ejecuta fn si hay sueldos; si faltan, abre el formulario y la ejecuta al guardar. */
+function conIngresos(fn) { if (ingresosOk()) fn(); else openIngresos(fn); }
 
 /* ===================== Arranque y login ===================== */
 async function boot() {
@@ -769,9 +753,6 @@ function cleanAmount(el) { el.value = el.value.replace(/[^\d.,]/g, '').replace(/
 function renderAdd() {
   $$('#tipoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.tipo));
   renderCats(); renderCuentaSeg(); syncDates('#dates', '#fecha', state.fecha); syncShare(); updateSave(); sizeAmount($('#importe'));
-  const ok = ingresosOk();
-  $('#presetProp').disabled = !ok;
-  $('#presetProp').title = ok ? '' : 'Indica los ingresos en el menú (tu inicial, arriba a la derecha)';
 }
 function renderCats() {
   $('#cats').innerHTML = state.cat.categorias.filter(c => c.tipo === state.tipo).map(c => `
@@ -860,8 +841,8 @@ function bindAdd() {
   });
   $('#pct').addEventListener('input', e => { state.pct = +e.target.value; syncShare(); });
   $$('.presets button').forEach(b => b.addEventListener('click', () => {
-    state.pct = b.dataset.p === 'prop' ? Math.round(shareIngresos(me().id) * 100) : +b.dataset.p;
-    syncShare();
+    if (b.dataset.p === 'prop') return conIngresos(() => { state.pct = Math.round(shareIngresos(me().id) * 100); syncShare(); });
+    state.pct = +b.dataset.p; syncShare();
   }));
   $('#guardar').addEventListener('click', save);
 }
@@ -893,17 +874,16 @@ function renderAp() {
   updateApSave();
 }
 function renderApSplit() {
-  const ok = ingresosOk(), other = otro();
-  if (state.ap.rep === 'ingresos' && !ok) state.ap.rep = '50_50';
-  $$('#apRepSeg button').forEach(b => { b.classList.toggle('on', b.dataset.v === state.ap.rep); if (b.dataset.v === 'ingresos') b.disabled = !ok; });
+  const other = otro();
+  if (state.ap.rep === 'ingresos' && !ingresosOk()) state.ap.rep = '50_50';
+  $$('#apRepSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.ap.rep));
   $('#apPctBox').hidden = state.ap.rep !== 'manual';
   $('#apPct').value = state.ap.pct;
   const s = apSplit();
   $('#apPartes').innerHTML = `
     <div class="part"><span class="n">Tú<small>${pctTxt(s.pctMe)}</small><span class="s">${$('#apYa').checked ? 'Se registra ahora desde tu cuenta' : 'Quedará pendiente para ti'}</span></span><span class="v">${money(s.mine)}</span></div>
     <div class="part"><span class="n">${esc(other?.nombre || '—')}<small>${pctTxt(1 - s.pctMe)}</small><span class="s">Le aparecerá como pendiente para que la acepte</span></span><span class="v">${money(s.other)}</span></div>`;
-  $('#apRepHint').innerHTML = state.ap.rep === 'ingresos' ? esc(`Según ingresos: ${ingresosTxt()}.`)
-    : !ok ? `Para repartir según ingresos faltan datos. <button id="apGoIng">Indicar ingresos</button>` : '';
+  $('#apRepHint').textContent = state.ap.rep === 'ingresos' ? `Según sueldo neto anual: ${ingresosTxt()}.` : '';
 }
 function updateApSave() {
   const dos = state.ap.modo === 'dos', s = apSplit();
@@ -976,7 +956,7 @@ function renderApList() {
 
 /* ===================== Modales ===================== */
 function openModal(html) { $('#sheet').innerHTML = html; $('#modal').hidden = false; }
-function closeModal() { $('#modal').hidden = true; state.modalCtx = null; }
+function closeModal() { $('#modal').hidden = true; state.modalCtx = null; state.afterIng = null; }
 
 function maybePopup() {
   if (!$('#modal').hidden || !state.started) return;
@@ -1004,20 +984,27 @@ function openPendiente({ a, p }) {
       <button class="ghost" data-m="later">Más tarde</button>
     </div>`);
 }
-function openIngresos() {
+function openIngresos(after) {
   state.modalCtx = { kind: 'ingresos' };
-  const mine = +me().ingreso_neto_mensual || '', other = otro();
-  const ox = other && state.ingresos[other.id];
+  state.afterIng = typeof after === 'function' ? after : null;
+  const ms = [me(), otro()].filter(Boolean);
   openModal(`
-    <div class="mh">Mis ingresos</div>
-    <p class="mp">Se usan para repartir gastos y aportaciones según ingresos. Cada uno indica el suyo desde su móvil.</p>
-    <label class="fl" for="mIng">Tu ingreso neto mensual</label>
-    <div class="inp"><input class="field" id="mIng" inputmode="decimal" placeholder="0" value="${esc(fmtInput(mine))}"><i>€</i></div>
-    ${other ? `<p class="mp" style="margin-top:12px">${esc(other.nombre)}: <b>${ox?.v ? money0(ox.v) : 'sin indicar'}</b>${ox?.src === 'media' ? ' (media de sus ingresos de 3 meses)' : ''}</p>` : ''}
+    <div class="mh">Sueldos netos anuales</div>
+    <p class="mp">${state.afterIng ? 'Para repartir según ingresos necesito el sueldo de los dos. ' : ''}Neto al año: lo que cobráis después de impuestos y Seguridad Social, sumando pagas extra.</p>
+    ${ms.map(m => `<label class="fl" for="mIng_${m.id}">${m.id === me().id ? 'Tu sueldo neto anual' : 'Sueldo neto anual de ' + esc(m.nombre)}</label>
+      <div class="inp"><input class="field" id="mIng_${m.id}" data-mid="${m.id}" inputmode="decimal" placeholder="0" value="${esc(fmtInput(+m.ingreso_neto_anual || 0))}"><i>€</i></div>`).join('')}
+    <p class="mp" id="mIngPct" style="margin-top:12px"></p>
     <div class="mbtns">
-      <button class="primary" data-m="saveIng">Guardar</button>
-      <button class="ghost" data-m="close">Cerrar</button>
+      <button class="primary" data-m="saveIng">Guardar${state.afterIng ? ' y aplicar' : ''}</button>
+      <button class="ghost" data-m="close">Cancelar</button>
     </div>`);
+  const upd = () => {
+    const v = ms.map(m => amountOf($('#mIng_' + m.id)));
+    $('#mIngPct').textContent = ms.length === 2 && v[0] > 0 && v[1] > 0
+      ? `Reparto: Tú ${pctTxt(v[0] / (v[0] + v[1]))} · ${ms[1].nombre} ${pctTxt(v[1] / (v[0] + v[1]))}` : '';
+  };
+  $$('#sheet [data-mid]').forEach(el => el.addEventListener('input', () => { cleanAmount(el); el.style.width = ''; upd(); }));
+  upd();
 }
 function bindModal() {
   $('#modal').addEventListener('click', async e => {
@@ -1041,15 +1028,21 @@ function bindModal() {
       } catch (err) { toast(err.message, 'err'); b.disabled = false; }
     }
     if (b.dataset.m === 'saveIng') {
-      const raw = $('#mIng').value.trim(), v = raw ? amountOf($('#mIng')) : null;
       b.disabled = true;
       try {
-        await api.updateIngreso(v);
-        me().ingreso_neto_mensual = v;
-        const mm = miembro(me().id); if (mm) mm.ingreso_neto_mensual = v;
+        for (const el of $$('#sheet [data-mid]')) {
+          const m = miembro(el.dataset.mid), v = el.value.trim() ? round2(amountOf(el)) : null;
+          if ((+m.ingreso_neto_anual || null) === v) continue;
+          await api.setIngresoAnual(m.id, v);
+          m.ingreso_neto_anual = v; if (m.id === me().id) me().ingreso_neto_anual = v;
+        }
         await loadIngresos();
-        closeModal(); toast('Ingresos guardados');
+        const after = state.afterIng;
+        closeModal();
+        if (after && !ingresosOk()) { toast('Faltan los sueldos de los dos', 'err'); }
+        else toast('Sueldos guardados');
         renderAdd(); renderAp();
+        if (after && ingresosOk()) after();
       } catch (err) { toast(err.message, 'err'); b.disabled = false; }
     }
   });
@@ -1066,13 +1059,13 @@ function bindAp() {
   bindDates('#apDates', '#apFecha', v => { state.ap.fecha = v; syncDates('#apDates', '#apFecha', v); });
   $('#apDesde').addEventListener('change', e => state.ap.desde = e.target.value);
   $('#apRepSeg').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.v === 'ingresos') return conIngresos(() => { state.ap.rep = 'ingresos'; renderApSplit(); updateApSave(); });
     if (b.dataset.v === 'manual' && state.ap.rep !== 'manual') state.ap.pct = Math.round(apSplit().pctMe * 100);
     state.ap.rep = b.dataset.v; renderApSplit();
   });
   $('#apPct').addEventListener('input', e => { state.ap.pct = +e.target.value; renderApSplit(); });
   $('#apYa').addEventListener('change', () => renderAp());
-  $('#apRepBox').addEventListener('click', e => { if (e.target.id === 'apGoIng') openIngresos(); });
   $('#apList').addEventListener('click', async e => {
     const reg = e.target.closest('[data-reg]'), can = e.target.closest('[data-cancel]');
     if (reg) { const x = myPending().find(x => x.p.id === reg.dataset.reg); if (x) openPendiente(x); }
@@ -1108,32 +1101,44 @@ async function loadList() {
   } catch (e) { $('#lista').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
 }
 function renderList() {
-  const gastos = state.movs.filter(m => m.tipo === 'gasto').reduce((s, m) => s + m.importe, 0);
-  const ingresos = state.movs.filter(m => m.tipo === 'ingreso').reduce((s, m) => s + m.importe, 0);
-  const c = comun();
-  const aportado = state.trs.filter(t => t.miembro_id === me().id && c && t.a_cuenta === c.id).reduce((s, t) => s + t.importe, 0);
-  $('#stats').innerHTML = `
+  const v = state.listView, c = comun(), mias = new Set(misCuentas().map(x => x.id));
+  $('#listSeg').hidden = !c || !mias.size;
+  $$('#listSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  const inView = id => v === 'comun' ? !!c && id === c.id : mias.has(id);
+  const movs = state.movs.filter(m => inView(m.cuenta_id) || (v === 'mia' && !m.cuenta_id && m.pagado_por === me().id));
+  const trs = state.trs.filter(t => inView(t.de_cuenta) || inView(t.a_cuenta)).map(t => ({ ...t, dir: inView(t.a_cuenta) ? 1 : -1 }));
+  const gastos = movs.filter(m => m.tipo === 'gasto').reduce((s, m) => s + m.importe, 0);
+  const ingresos = movs.filter(m => m.tipo === 'ingreso').reduce((s, m) => s + m.importe, 0);
+  const out = trs.filter(t => t.dir < 0).reduce((s, t) => s + t.importe, 0);
+  const inn = trs.filter(t => t.dir > 0).reduce((s, t) => s + t.importe, 0);
+  $('#stats').innerHTML = v === 'comun' ? `
+    <div class="stat"><div class="k">Gastos</div><div class="v">${money(gastos)}</div></div>
+    <div class="stat"><div class="k">Aportaciones</div><div class="v" style="color:var(--ingreso)">${money(inn)}</div></div>
+    <div class="stat"><div class="k">Diferencia</div><div class="v">${money(inn + ingresos - gastos - out)}</div></div>` : `
     <div class="stat"><div class="k">Gastos</div><div class="v">${money(gastos)}</div></div>
     <div class="stat"><div class="k">Ingresos</div><div class="v" style="color:var(--ingreso)">${money(ingresos)}</div></div>
-    <div class="stat"><div class="k">Aportado a común</div><div class="v">${money(aportado)}</div></div>`;
-  $('#scope').textContent = `Solo ${visibles().map(x => nombreCuenta(x).toLowerCase()).join(' y ')}.`;
+    <div class="stat"><div class="k">Aportado a común</div><div class="v">${money(out)}</div></div>`;
+  if (v === 'comun') {
+    const por = state.cat.miembros.map(m => [m, trs.filter(t => t.dir > 0 && t.miembro_id === m.id).reduce((s, t) => s + t.importe, 0)]);
+    $('#scope').textContent = 'Aportado este mes: ' + por.map(([m, x]) => `${nombreCorto(m)} ${money(x)}`).join(' · ');
+  } else $('#scope').textContent = '';
 
   const mine = state.bal.find(b => b.miembro_id === me().id), other = otro();
   const bx = $('#balance');
-  if (mine && other && Math.abs(+mine.saldo) >= 0.005) {
+  if (v === 'mia' && mine && other && Math.abs(+mine.saldo) >= 0.005) {
     const s = +mine.saldo;
     const big = s > 0 ? `${other.nombre} te debe ${money(s)}` : `Debes ${money(-s)} a ${other.nombre}`;
     bx.innerHTML = `<span class="bdot">⇄</span><div><div class="big">${esc(big)}</div><div class="sm">Por gastos compartidos pagados desde cuentas personales.</div></div>`;
     bx.hidden = false;
   } else bx.hidden = true;
 
-  const items = [...state.movs.map(m => ({ ...m, k: 'm' })), ...state.trs.map(t => ({ ...t, k: 't' }))];
-  if (!items.length) { $('#lista').innerHTML = '<div class="empty">Sin movimientos este mes.</div>'; return; }
+  const items = [...movs.map(m => ({ ...m, k: 'm' })), ...trs.map(t => ({ ...t, k: 't' }))];
+  if (!items.length) { $('#lista').innerHTML = `<div class="empty">Sin movimientos en ${v === 'comun' ? 'la cuenta común' : 'tu cuenta'} este mes.</div>`; return; }
   const byDay = {};
   items.forEach(m => (byDay[m.fecha] ||= []).push(m));
   $('#lista').innerHTML = Object.keys(byDay).sort().reverse().map(d => {
     const list = byDay[d].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-    const tot = list.filter(m => m.k === 'm').reduce((s, m) => s + (m.tipo === 'gasto' ? -m.importe : m.importe), 0);
+    const tot = list.reduce((s, m) => s + (m.k === 't' ? m.dir * m.importe : m.tipo === 'gasto' ? -m.importe : m.importe), 0);
     return `<div class="day"><span>${esc(dayLabel(d))}</span><span>${money(tot)}</span></div>
       <div class="items">${list.map(itemHTML).join('')}</div>`;
   }).join('');
@@ -1144,10 +1149,10 @@ function itemHTML(m) {
   if (m.k === 't') {
     const de = cuenta(m.de_cuenta), a = cuenta(m.a_cuenta);
     ic = '⇄'; color = '#0F6B5F';
-    title = m.nota || `Aportación a ${nombreCuenta(a).toLowerCase()}`;
-    sub = `${nombreCuenta(de)} → ${nombreCuenta(a)} · ${nombreCorto(miembro(m.miembro_id))}`;
+    title = m.nota || (m.dir > 0 ? `Aportación de ${nombreCorto(miembro(m.miembro_id))}` : `Aportación a ${nombreCuenta(a).toLowerCase()}`);
+    sub = m.dir > 0 ? `Desde ${nombreCuenta(de)} · ${nombreCorto(miembro(m.miembro_id))}` : `A ${nombreCuenta(a).toLowerCase()} · ${nombreCorto(miembro(m.miembro_id))}`;
     badge = '<span class="badge">Aportación</span>';
-    amt = `<span class="amt">${money(m.importe)}</span>`;
+    amt = `<span class="amt ${m.dir > 0 ? 'ingreso' : ''}">${m.dir > 0 ? '+' : '−'}${money(m.importe)}</span>`;
   } else {
     const c = categoria(m.categoria_id) || { nombre: 'Sin categoría', icono: '❔', color: '#999' };
     ic = c.icono; color = c.color; title = m.descripcion || c.nombre;
@@ -1168,6 +1173,10 @@ function itemHTML(m) {
   </div>`;
 }
 function bindList() {
+  $('#listSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state.listView = b.dataset.v; lsSet('fin_list', b.dataset.v); state.openId = null; renderList();
+  });
   $('#prevMes').addEventListener('click', () => { state.mes = addMonths(state.mes, -1); state.openId = null; loadList(); });
   $('#nextMes').addEventListener('click', () => { state.mes = addMonths(state.mes, 1); state.openId = null; loadList(); });
   $('#lista').addEventListener('click', async e => {
