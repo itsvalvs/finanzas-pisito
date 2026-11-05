@@ -9,6 +9,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Informe">
 <title>Gastos · Informe</title>
+<link rel="apple-touch-icon" href="icon-informe.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-informe.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -60,7 +62,10 @@ h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .menu .em{font-size:13px;color:var(--muted);padding:6px 8px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;word-break:break-all}
 .menu button{width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700}
 .menu button:hover{background:var(--surface-2)}
-.controls{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
+.controls{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:12px}
+#scopeSeg{flex:1 1 260px;max-width:420px}
+#scopeSeg button{flex:1}
+.sw.dash{background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 7px)}
 .seg{display:flex;background:var(--surface-2);border-radius:13px;padding:4px;gap:4px}
 .seg button{padding:8px 16px;border-radius:10px;font-weight:700;font-size:14px;color:var(--muted);white-space:nowrap}
 .seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -187,6 +192,10 @@ tbody tr.click:hover td{background:var(--surface-2)}
 .login h2{font-size:22px;font-weight:800;margin-bottom:6px}
 .login p{color:var(--muted);margin-bottom:16px}
 .login .btn{width:100%;margin-top:10px;padding:14px}
+.linkbtn{font-weight:700;color:var(--accent);font-size:14px;padding:12px 0;display:block;margin:0 auto}
+.code{text-align:center;font-size:26px;font-weight:800;letter-spacing:.3em;font-variant-numeric:tabular-nums}
+.menu a{display:block;width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700;color:inherit;text-decoration:none}
+.menu a:hover{background:var(--surface-2)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:700;font-size:14px;transition:opacity .2s,transform .2s;z-index:70}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.err{background:var(--critical);color:#fff}
@@ -204,11 +213,16 @@ tbody tr.click:hover td{background:var(--surface-2)}
         <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
         <div class="menu" id="menu" hidden>
           <div class="em" id="menuEmail"></div>
+          <a href="./">Añadir gastos</a>
           <button id="logout">Cerrar sesión</button>
         </div>
       </div>
     </div>
     <div class="controls" id="controls" hidden>
+      <div class="seg" id="scopeSeg">
+        <button data-v="mia" class="on">Mi cuenta</button>
+        <button data-v="comun">Cuenta común</button>
+      </div>
       <div class="monthnav" id="monthnav">
         <button id="prevMes" aria-label="Mes anterior">‹</button>
         <strong id="mesLabel"></strong>
@@ -223,10 +237,19 @@ tbody tr.click:hover td{background:var(--surface-2)}
   </div>
 
   <section id="view-login" class="login" hidden>
-    <h2>Entra con tu email</h2>
-    <p>Te enviamos un enlace de acceso. Solo funcionan los emails invitados al hogar.</p>
-    <input class="field" id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
-    <button class="btn primary" id="loginBtn">Enviarme el enlace</button>
+    <div id="loginStep1">
+      <h2>Entra con tu email</h2>
+      <p>Te enviamos un código de acceso. Solo funcionan los emails invitados al hogar.</p>
+      <input class="field" id="loginEmail" type="email" inputmode="email" autocomplete="email" placeholder="tu@email.com">
+      <button class="btn primary" id="loginBtn">Enviarme el código</button>
+    </div>
+    <div id="loginStep2" hidden>
+      <h2>Escribe el código</h2>
+      <p id="codeTxt"></p>
+      <input class="field code" id="loginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="······">
+      <button class="btn primary" id="codeBtn">Entrar</button>
+      <button class="linkbtn" id="codeBack">Cambiar email o reenviar</button>
+    </div>
     <p class="note" id="loginMsg"></p>
   </section>
 
@@ -256,11 +279,16 @@ tbody tr.click:hover td{background:var(--surface-2)}
 
       <div class="card span-12">
         <div class="cardhead">
-          <div><h2>Ingresos y gastos</h2><div class="sub" id="evoSub">Últimos 12 meses</div></div>
-          <div class="legend">
-            <span><i class="sw line" style="background:var(--s-ingresos)"></i>Ingresos</span>
-            <span><i class="sw line" style="background:var(--s-gastos)"></i>Gastos</span>
-          </div>
+          <div><h2>Ritmo de gasto</h2><div class="sub" id="ritmoSub"></div></div>
+          <div class="legend" id="ritmoLegend"></div>
+        </div>
+        <div class="chart" id="ritmoChart"></div>
+      </div>
+
+      <div class="card span-12">
+        <div class="cardhead">
+          <div><h2 id="evoTitle">Ingresos y gastos</h2><div class="sub" id="evoSub">Últimos 12 meses</div></div>
+          <div class="legend" id="evoLegend"></div>
         </div>
         <div class="chart" id="evoChart"></div>
         <details class="tbl"><summary>Ver como tabla</summary><div class="tw" id="evoTable"></div></details>
@@ -268,7 +296,7 @@ tbody tr.click:hover td{background:var(--surface-2)}
 
       <div class="card span-7">
         <div class="cardhead">
-          <div><h2>Gasto por categoría</h2><div class="sub">La marca vertical es el presupuesto, si lo hay.</div></div>
+          <div><h2>Gasto por categoría</h2><div class="sub" id="catSub"></div></div>
         </div>
         <div class="bars" id="catBars"></div>
         <button class="more" id="catMore" hidden></button>
@@ -279,8 +307,8 @@ tbody tr.click:hover td{background:var(--surface-2)}
         <div class="sub">Según la naturaleza de cada categoría.</div>
         <div id="fijoVar" style="margin-top:12px"></div>
 
-        <h2 style="margin-top:24px">Lo que asume cada uno</h2>
-        <div class="sub">Gastos del mes repartidos según quién paga y el % de cada gasto compartido.</div>
+        <h2 style="margin-top:24px" id="sideTitle"></h2>
+        <div class="sub" id="sideSub"></div>
         <div class="bars" id="personBars" style="margin-top:14px"></div>
         <div class="balance" id="balance" hidden></div>
       </div>
@@ -299,12 +327,12 @@ tbody tr.click:hover td{background:var(--surface-2)}
 
 <script>
 /* =====================================================================
-   CONFIGURACIÓN (la misma que en entrada.html)
+   CONFIGURACIÓN (la misma que en index.html)
    Vacío = modo demo. Usa SOLO la clave anon/publishable.
    ===================================================================== */
 const CONFIG = {
-  SUPABASE_URL: 'https://fbhzczoulztuoighzugf.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_dxlS6HNEMuvxb3BU6UVfSA_9nKV1xgs',
+  SUPABASE_URL: 'https://fbhzczoulztuoighzugf.supabase.co',       // p. ej. https://abcdefgh.supabase.co
+  SUPABASE_ANON_KEY: 'sb_publishable_dxlS6HNEMuvxb3BU6UVfSA_9nKV1xgs',  // Project Settings → API → anon public
 };
 const DEMO = !CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY;
 
@@ -328,6 +356,8 @@ const mesCorto = s => new Date(s + 'T12:00:00').toLocaleDateString('es-ES', {mon
 const mesNombre = s => new Date(s + 'T12:00:00').toLocaleDateString('es-ES', {month:'long'});
 const round2 = n => Math.round(n * 100) / 100;
 const sum = a => a.reduce((s, x) => s + x, 0);
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 
 function toast(msg, kind = '') {
   const t = $('#toast');
@@ -341,10 +371,7 @@ function demoApi() {
   const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const between = (a, b) => round2(a + rnd() * (b - a));
   const hogar = { id: 'h1', nombre: 'Casa · demo', reparto_defecto: 0.5 };
-  const miembros = [
-    { id: 'm1', nombre: 'Valvanuz', ingreso_neto_mensual: null },
-    { id: 'm2', nombre: 'Pareja',   ingreso_neto_mensual: null },
-  ];
+  const miembros = [{ id: 'm1', nombre: 'Valvanuz' }, { id: 'm2', nombre: 'Fran' }];
   const CATS = [
     ['Vivienda','gasto','fijo','🏠'],['Suministros','gasto','fijo','💡'],['Internet y móvil','gasto','fijo','📶'],
     ['Súper','gasto','variable','🛒'],['Restaurantes','gasto','variable','🍽️'],['Transporte','gasto','variable','🚆'],
@@ -355,64 +382,75 @@ function demoApi() {
   ];
   const categorias = CATS.map(([nombre, tipo, naturaleza, icono], i) => ({ id: 'c' + i, nombre, tipo, naturaleza, icono }));
   const cid = n => categorias.find(c => c.nombre === n).id;
-
-  const movs = [];
+  const cuentas = [
+    { id: 'a1', nombre: 'Cuenta común',    tipo: 'comun',     titular_id: null },
+    { id: 'a2', nombre: 'Cuenta Valvanuz', tipo: 'corriente', titular_id: 'm1' },
+    { id: 'a3', nombre: 'Cuenta Fran',     tipo: 'corriente', titular_id: 'm2' },
+  ];
+  const movs = [], trs = [];
   const t = today(), cur = monthStart(t);
-  const add = (fecha, tipo, cat, importe, desc, por, ambito = 'personal', p = 1) => {
-    if (fecha > t) return;
-    movs.push({ id: 'mv' + movs.length, fecha, mes: monthStart(fecha), tipo, importe: round2(importe), categoria_id: cid(cat),
-      descripcion: desc, pagado_por: por, ambito, pct_pagador: ambito === 'compartido' ? p : 1, cuenta_id: por === 'm1' ? 'a2' : 'a3' });
+  const add = (fecha, tipo, cat, importe, desc, cuenta, ambito = 'personal') => {
+    if (fecha > t || !importe) return;
+    const c = cuentas.find(x => x.id === cuenta), esC = c.tipo === 'comun';
+    movs.push({ id: 'mv' + movs.length, fecha, mes: monthStart(fecha), tipo, importe: round2(importe), categoria_id: cid(cat), descripcion: desc,
+      pagado_por: c.titular_id, ambito: esC ? 'compartido' : ambito, pct_pagador: esC || ambito === 'compartido' ? 0.5 : 1, cuenta_id: cuenta });
   };
+  const tr = (fecha, de, a, importe, quien, nota) => { if (fecha <= t) trs.push({ id: 't' + trs.length, fecha, de_cuenta: de, a_cuenta: a, importe, miembro_id: quien, nota }); };
   for (let k = 12; k >= 0; k--) {
     const ms = addMonths(cur, -k), mo = +ms.slice(5, 7);
     const day = n => ms.slice(0, 8) + pad(Math.min(n, 28));
-    add(day(1), 'ingreso', 'Nómina', mo === 6 || mo === 12 ? 3900 : 2100, 'Nómina', 'm1');
-    add(day(1), 'ingreso', 'Nómina', mo === 7 || mo === 12 ? 3150 : 1700, 'Nómina', 'm2');
-    add(day(2), 'gasto', 'Vivienda', 480, 'Alquiler habitación', 'm1');
-    add(day(3), 'gasto', 'Vivienda', 200, 'Aportación casa', 'm2');
-    add(day(6), 'gasto', 'Suministros', between(35, 60), 'Luz y gas (mi parte)', 'm1');
-    add(day(8), 'gasto', 'Internet y móvil', 25, 'DIGI', 'm1');
-    add(day(8), 'gasto', 'Internet y móvil', 32, 'VODAFONE', 'm2');
-    add(day(9), 'gasto', 'Suscripciones', 11.99, 'SPOTIFY', 'm1');
-    add(day(9), 'gasto', 'Suscripciones', 13.99, 'NETFLIX', 'm2', 'compartido', 0.5);
-    add(day(10), 'gasto', 'Seguros', 45, 'Seguro coche', 'm2');
-    [4, 11, 18, 25].forEach(d => add(day(d), 'gasto', 'Súper', between(22, 68), ['MERCADONA', 'EROSKI', 'LIDL'][Math.floor(rnd() * 3)], 'm1'));
-    [7, 15, 23].forEach(d => add(day(d), 'gasto', 'Súper', between(18, 45), ['CARREFOUR', 'EROSKI'][Math.floor(rnd() * 2)], 'm2'));
-    [5, 13, 20].forEach((d, i) => add(day(d), 'gasto', 'Restaurantes', between(28, 75), ['Cena fuera', 'Pintxos', 'Comida domingo'][i], i % 2 ? 'm2' : 'm1', 'compartido', 0.5));
-    [12, 26].forEach(d => add(day(d), 'gasto', 'Restaurantes', between(6, 18), 'Café / menú', 'm1'));
-    add(day(5), 'gasto', 'Transporte', between(40, 70), 'Abono transporte', 'm1');
-    add(day(14), 'gasto', 'Coche', between(60, 110), 'Gasolina', 'm2');
-    [16, 27].forEach((d, i) => add(day(d), 'gasto', 'Ocio', between(18, 55), i ? 'Conciertos' : 'Cine', i ? 'm2' : 'm1', 'compartido', 0.5));
-    if (rnd() > 0.35) add(day(19), 'gasto', 'Ropa', between(30, 95), 'ZARA', 'm1');
-    if (rnd() > 0.5) add(day(21), 'gasto', 'Ropa', between(25, 80), 'PRIMARK', 'm2');
-    if (rnd() > 0.6) add(day(17), 'gasto', 'Salud', between(8, 40), 'FARMACIA', rnd() > 0.5 ? 'm1' : 'm2');
-    if (mo === 8) add(day(10), 'gasto', 'Viajes', 640, 'Viaje verano', 'm1', 'compartido', 0.5);
-    if (mo === 4) add(day(12), 'gasto', 'Viajes', 320, 'Escapada', 'm2', 'compartido', 0.5);
-    if (mo === 12) { add(day(20), 'gasto', 'Regalos', 160, 'Regalos Navidad', 'm1'); add(day(21), 'gasto', 'Regalos', 140, 'Regalos Navidad', 'm2'); }
-    if (rnd() > 0.7) add(day(22), 'gasto', 'Otros', between(10, 45), 'Varios', 'm1');
+    add(day(1), 'ingreso', 'Nómina', mo === 6 || mo === 12 ? 3900 : 2100, 'Nómina', 'a2');
+    add(day(1), 'ingreso', 'Nómina', mo === 7 || mo === 12 ? 3150 : 1700, 'Nómina', 'a3');
+    tr(day(2), 'a2', 'a1', 825, 'm1', `Gastos de ${mesNombre(ms)}`);
+    tr(day(3), 'a3', 'a1', 675, 'm2', `Gastos de ${mesNombre(ms)}`);
+    // Cuenta común
+    add(day(2), 'gasto', 'Vivienda', 850, 'Alquiler', 'a1');
+    add(day(6), 'gasto', 'Suministros', between(70, 115), 'IBERDROLA', 'a1');
+    add(day(8), 'gasto', 'Internet y móvil', 35, 'DIGI fibra', 'a1');
+    add(day(9), 'gasto', 'Suscripciones', 13.99, 'NETFLIX', 'a1');
+    [4, 11, 18, 25].forEach(d => add(day(d), 'gasto', 'Súper', between(45, 95), ['MERCADONA', 'EROSKI', 'LIDL'][Math.floor(rnd() * 3)], 'a1'));
+    [5, 20].forEach(d => add(day(d), 'gasto', 'Restaurantes', between(35, 80), 'Cena fuera', 'a1'));
+    add(day(16), 'gasto', 'Ocio', between(20, 60), 'Cine', 'a1');
+    if (rnd() > 0.6) add(day(13), 'gasto', 'Hogar y muebles', between(20, 120), 'IKEA', 'a1');
+    // Cuenta Valvanuz
+    add(day(5), 'gasto', 'Transporte', between(40, 70), 'Abono transporte', 'a2');
+    add(day(8), 'gasto', 'Internet y móvil', 15, 'Móvil', 'a2');
+    add(day(9), 'gasto', 'Suscripciones', 11.99, 'SPOTIFY', 'a2');
+    [12, 26].forEach(d => add(day(d), 'gasto', 'Restaurantes', between(6, 18), 'Café / menú', 'a2'));
+    add(day(23), 'gasto', 'Ocio', between(15, 45), 'Pintxos con amigas', 'a2');
+    if (rnd() > 0.35) add(day(19), 'gasto', 'Ropa', between(30, 95), 'ZARA', 'a2');
+    if (rnd() > 0.6) add(day(17), 'gasto', 'Salud', between(8, 40), 'FARMACIA', 'a2');
+    if (mo === 8) add(day(10), 'gasto', 'Viajes', 640, 'Viaje verano', 'a2', 'compartido');
+    if (mo === 12) add(day(20), 'gasto', 'Regalos', 160, 'Regalos Navidad', 'a2');
+    // Cuenta Fran
+    add(day(10), 'gasto', 'Seguros', 45, 'Seguro coche', 'a3');
+    add(day(14), 'gasto', 'Coche', between(60, 110), 'Gasolina', 'a3');
+    if (rnd() > 0.5) add(day(21), 'gasto', 'Ropa', between(25, 80), 'PRIMARK', 'a3');
   }
-  const presupuestos = ['Súper:280', 'Restaurantes:150', 'Ocio:80', 'Ropa:70', 'Transporte:60', 'Coche:90']
+  const presupuestos = ['Súper:320', 'Restaurantes:150', 'Ocio:80', 'Suministros:110']
     .map(s => { const [n, v] = s.split(':'); return { categoria_id: cid(n), importe: +v }; });
   return {
     mode: 'demo', onAuth() {}, async signOut() {},
-    async catalog() { return { hogar, me: miembros[0], email: 'modo demo', miembros, categorias }; },
+    async catalog() { return { hogar, me: miembros[0], email: 'modo demo', miembros, categorias, cuentas }; },
     async movs(desde, hasta) { return movs.filter(m => m.fecha >= desde && m.fecha < hasta); },
-    async presupuestos(mes) { return mes === cur ? presupuestos : presupuestos.map(p => ({ ...p })); },
+    async trs(desde, hasta) { return trs.filter(x => x.fecha >= desde && x.fecha < hasta); },
+    async presupuestos() { return presupuestos.map(p => ({ ...p })); },
     async capital() {
       const ini = addMonths(cur, -12);
-      const cuentas = [
-        { cuenta_id: 'a2', nombre: 'Cuenta Valvanuz', tipo: 'corriente', titular_id: 'm1', saldo_inicial: 20000, fecha_saldo_inicial: ini },
-        { cuenta_id: 'a3', nombre: 'Cuenta Pareja',   tipo: 'corriente', titular_id: 'm2', saldo_inicial: 6000,  fecha_saldo_inicial: ini },
-      ];
+      const base = { a1: 1000, a2: 20000, a3: 6000 };
       const mensual = [];
       for (const c of cuentas) {
-        let sal = c.saldo_inicial;
-        for (let mo = monthStart(c.fecha_saldo_inicial); mo <= cur; mo = addMonths(mo, 1)) {
-          sal += sum(movs.filter(m => m.cuenta_id === c.cuenta_id && m.mes === mo && m.fecha >= c.fecha_saldo_inicial).map(m => m.tipo === 'ingreso' ? m.importe : -m.importe));
-          mensual.push({ cuenta_id: c.cuenta_id, titular_id: c.titular_id, mes: mo, saldo_fin_mes: round2(sal) });
+        let sal = base[c.id];
+        for (let mo = ini; mo <= cur; mo = addMonths(mo, 1)) {
+          sal += sum(movs.filter(m => m.cuenta_id === c.id && m.mes === mo).map(m => m.tipo === 'ingreso' ? m.importe : -m.importe));
+          sal += sum(trs.filter(x => monthStart(x.fecha) === mo && x.a_cuenta === c.id).map(x => x.importe));
+          sal -= sum(trs.filter(x => monthStart(x.fecha) === mo && x.de_cuenta === c.id).map(x => x.importe));
+          mensual.push({ cuenta_id: c.id, titular_id: c.titular_id, mes: mo, saldo_fin_mes: round2(sal) });
         }
       }
-      return { saldos: cuentas.map(c => ({ ...c, saldo_actual: mensual.filter(x => x.cuenta_id === c.cuenta_id).at(-1).saldo_fin_mes })), mensual };
+      const saldos = cuentas.map(c => ({ cuenta_id: c.id, nombre: c.nombre, tipo: c.tipo, titular_id: c.titular_id, saldo_inicial: base[c.id], fecha_saldo_inicial: ini,
+        saldo_actual: mensual.filter(x => x.cuenta_id === c.id).at(-1).saldo_fin_mes }));
+      return { saldos, mensual };
     },
     async balance() {
       const s = { m1: 0, m2: 0 };
@@ -427,7 +465,8 @@ function supaApi() {
   const sb = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
   let hogarId = null;
   const ok = ({ data, error }) => { if (error) throw new Error(error.message); return data; };
-  const COLS = 'id,fecha,mes,tipo,importe,descripcion,ambito,pct_pagador,categoria_id,pagado_por';
+  const COLS = 'id,fecha,mes,tipo,importe,descripcion,ambito,pct_pagador,categoria_id,pagado_por,cuenta_id';
+  const paged = async (q) => { const out = []; for (let from = 0; ; from += 1000) { const page = ok(await q().range(from, from + 999)); out.push(...page); if (page.length < 1000) break; } return out; };
   return {
     mode: 'supabase',
     onAuth(cb) { sb.auth.onAuthStateChange((_e, s) => setTimeout(() => cb(s), 0)); },
@@ -435,29 +474,30 @@ function supaApi() {
       const { error } = await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false, emailRedirectTo: location.origin + location.pathname } });
       if (error) throw new Error(error.message);
     },
+    async verify(email, token) {
+      const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
+      if (error) throw new Error(error.message);
+    },
     async signOut() { await sb.auth.signOut(); },
     async catalog() {
       const { data: { user } } = await sb.auth.getUser();
       const { data: me, error } = await sb.from('miembros').select('*').eq('user_id', user.id).maybeSingle();
       if (error) throw new Error(error.message);
-      if (!me) throw new Error('Tu usuario no está asociado a ningún hogar. Revisa el paso 7 del schema.sql.');
+      if (!me) throw new Error('Tu usuario no está asociado a ningún hogar. Revisa el SQL que crea el hogar y los miembros.');
       hogarId = me.hogar_id;
-      const [hogar, miembros, categorias] = await Promise.all([
+      const [hogar, miembros, categorias, cuentas] = await Promise.all([
         sb.from('hogares').select('*').eq('id', hogarId).single().then(ok),
         sb.from('miembros').select('*').eq('hogar_id', hogarId).order('created_at').then(ok),
         sb.from('categorias').select('*').eq('hogar_id', hogarId).order('orden').then(ok),
+        sb.from('cuentas').select('*').eq('hogar_id', hogarId).eq('activa', true).order('nombre').then(ok),
       ]);
-      return { hogar, me, email: user.email, miembros, categorias };
+      return { hogar, me, email: user.email, miembros, categorias, cuentas };
     },
     async movs(desde, hasta) {
-      const out = [];
-      for (let from = 0; ; from += 1000) {
-        const page = ok(await sb.from('v_movimientos').select(COLS).eq('hogar_id', hogarId)
-          .gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id').range(from, from + 999));
-        out.push(...page);
-        if (page.length < 1000) break;
-      }
-      return out;
+      return paged(() => sb.from('v_movimientos').select(COLS).eq('hogar_id', hogarId).gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id'));
+    },
+    async trs(desde, hasta) {
+      return paged(() => sb.from('transferencias').select('id,fecha,de_cuenta,a_cuenta,importe,miembro_id,nota').eq('hogar_id', hogarId).gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id'));
     },
     async presupuestos(mes) { return ok(await sb.from('presupuestos').select('categoria_id,importe').eq('hogar_id', hogarId).eq('mes', mes)); },
     async capital() {
@@ -475,28 +515,21 @@ function supaApi() {
 let api;
 const state = {
   started: false, cat: null, capital: null,
-  mes: new Date().getDate() <= 7 ? addMonths(monthStart(today()), -1) : monthStart(today()), movs: [], pres: [], bal: [],
-  catAll: false,
+  mes: monthStart(today()), scope: lsGet('fin_rep_scope') === 'comun' ? 'comun' : 'mia',
+  movs: [], trs: [], pres: [], bal: [], catAll: false,
 };
 const me = () => state.cat.me;
+const otro = () => state.cat.miembros.find(m => m.id !== me().id);
 const miembrosOrd = () => [...state.cat.miembros].sort((a, b) => a.id === me().id ? -1 : b.id === me().id ? 1 : 0);
 const categoria = id => state.cat.categorias.find(c => c.id === id);
 const memberColor = id => miembrosOrd().findIndex(m => m.id === id) === 0 ? 'var(--s-m1)' : 'var(--s-m2)';
 const nombre = m => m.id === me().id ? 'Tú' : m.nombre;
-
-/* Reparto de cada movimiento entre miembros */
-function attrib(mv) {
-  const ms = state.cat.miembros, out = {};
-  const imp = +mv.importe;
-  if (!mv.pagado_por) ms.forEach(m => out[m.id] = imp / ms.length);
-  else if (mv.ambito === 'compartido') {
-    const p = +mv.pct_pagador;
-    out[mv.pagado_por] = imp * p;
-    const otros = ms.filter(m => m.id !== mv.pagado_por);
-    otros.forEach(m => out[m.id] = imp * (1 - p) / otros.length);
-  } else out[mv.pagado_por] = imp;
-  return out;
-}
+const misCuentas = () => (state.cat.cuentas || []).filter(c => c.titular_id === me().id);
+const comun = () => (state.cat.cuentas || []).find(c => c.tipo === 'comun');
+const enComun = () => state.scope === 'comun';
+const scopeIds = () => new Set((enComun() ? [comun()] : misCuentas()).filter(Boolean).map(c => c.id));
+const daysIn = mes => new Date(+mes.slice(0, 4), +mes.slice(5, 7), 0).getDate();
+const sgn0 = n => (n < 0 ? '−' : '') + money0(Math.abs(n));
 
 /* ===================== Arranque ===================== */
 async function boot() {
@@ -519,10 +552,16 @@ async function start() {
   state.started = true;
   try {
     state.cat = await api.catalog();
-    const desde = addMonths(monthStart(today()), -24);
-    [state.movs, state.bal, state.capital] = await Promise.all([api.movs(desde, addMonths(monthStart(today()), 1)), api.balance(), api.capital()]);
+    const desde = addMonths(monthStart(today()), -24), hasta = addMonths(monthStart(today()), 1);
+    [state.movs, state.trs, state.bal, state.capital] = await Promise.all([
+      api.movs(desde, hasta), api.trs(desde, hasta).catch(() => []), api.balance(), api.capital(),
+    ]);
     state.movs.forEach(m => { m.importe = +m.importe; m.pct_pagador = +m.pct_pagador; m.mes = m.mes || monthStart(m.fecha); });
+    state.trs.forEach(t => { t.importe = +t.importe; });
   } catch (e) { state.started = false; return showMsg(e.message); }
+  if (!comun()) state.scope = 'mia';
+  if (!misCuentas().length && comun()) state.scope = 'comun';
+  $('#scopeSeg').hidden = !comun() || !misCuentas().length;
   $('#hogarName').textContent = state.cat.hogar.nombre;
   $('#avatar').textContent = (me().nombre || '?').charAt(0).toUpperCase();
   $('#menuEmail').textContent = state.cat.email || '';
@@ -534,7 +573,6 @@ async function start() {
 function go() {
   hideAll();
   $('#view-resumen').hidden = false;
-  $('#viewTitle').textContent = 'Informe';
   renderResumen();
 }
 
@@ -549,19 +587,26 @@ function showTip(html, x, y) {
   tip.style.left = Math.max(8, left) + 'px'; tip.style.top = Math.max(8, top) + 'px';
 }
 const hideTip = () => tip.classList.remove('show');
-const tipRow = (color, label, value) => `<div class="r"><span>${color ? `<i class="sw" style="background:${color}"></i>` : ''}${esc(label)}</span><b>${value}</b></div>`;
+const tipRow = (color, label, value, dash) => `<div class="r"><span>${color ? `<i class="sw ${dash ? 'dash' : ''}" style="${dash ? '' : `background:${color}`}"></i>` : ''}${esc(label)}</span><b>${value}</b></div>`;
 function bindTip(el, htmlFn) {
   el.addEventListener('pointermove', e => showTip(htmlFn(e), e.clientX, e.clientY));
   el.addEventListener('pointerleave', hideTip);
   el.addEventListener('pointerdown', e => showTip(htmlFn(e), e.clientX, e.clientY));
 }
 
-/* ===================== RESUMEN ===================== */
-function monthAgg(mes) {
-  const ms = state.movs.filter(m => m.mes === mes);
+/* ===================== Datos por cuenta ===================== */
+/* Agregado del mes para la cuenta elegida (Mi cuenta / Cuenta común). hastaDia limita al día N. */
+function monthAgg(mes, hastaDia = 31) {
+  const ids = scopeIds(), mia = !enComun(), meId = me().id;
+  const okDay = f => +f.slice(8, 10) <= hastaDia;
+  const ms = state.movs.filter(m => m.mes === mes && okDay(m.fecha) && (ids.has(m.cuenta_id) || (mia && !m.cuenta_id && m.pagado_por === meId)));
+  const ts = state.trs.filter(t => monthStart(t.fecha) === mes && okDay(t.fecha) && ids.has(t.de_cuenta) !== ids.has(t.a_cuenta));
   const ing = sum(ms.filter(m => m.tipo === 'ingreso').map(m => m.importe));
   const gas = sum(ms.filter(m => m.tipo === 'gasto').map(m => m.importe));
-  return { ms, ing, gas, ahorro: ing - gas, tasa: ing ? (ing - gas) / ing : NaN };
+  const apIn = sum(ts.filter(t => ids.has(t.a_cuenta)).map(t => t.importe));
+  const apOut = sum(ts.filter(t => ids.has(t.de_cuenta)).map(t => t.importe));
+  const neto = ing + apIn - gas - apOut;
+  return { ms, ts, ing, gas, apIn, apOut, neto, entradas: ing + apIn, tasa: ing ? neto / ing : NaN };
 }
 
 async function renderResumen() {
@@ -569,8 +614,10 @@ async function renderResumen() {
   $('#mesLabel').textContent = mesLargo(mes);
   $('#nextMes').disabled = mes >= cur;
   $('#prevMes').disabled = mes <= addMonths(cur, -23);
-  try { state.pres = await api.presupuestos(mes); } catch { state.pres = []; }
-  renderKpis(); renderCapital(); renderEvo(); renderCats(); renderFijoVar(); renderPersons(); renderTop();
+  $$('#scopeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.scope));
+  $('#viewTitle').textContent = enComun() ? 'Cuenta común' : 'Mi cuenta';
+  try { state.pres = enComun() ? await api.presupuestos(mes) : []; } catch { state.pres = []; }
+  renderKpis(); renderCapital(); renderRitmo(); renderEvo(); renderCats(); renderFijoVar(); renderSide(); renderTop();
 }
 
 function deltaTxt(a, b, label, invertGood) {
@@ -583,14 +630,27 @@ function deltaTxt(a, b, label, invertGood) {
 }
 
 function renderKpis() {
-  const a = monthAgg(state.mes), p = monthAgg(addMonths(state.mes, -1));
-  const pl = mesNombre(addMonths(state.mes, -1));
-  const parcial = state.mes === monthStart(today()) ? ' · mes en curso' : '';
-  $('#kpis').innerHTML = `
-    <div class="kpi"><div class="k">Gastos${parcial}</div><div class="v">${money0(a.gas)}</div><div class="d">${deltaTxt(a.gas, p.gas, pl)}</div></div>
-    <div class="kpi"><div class="k">Ingresos</div><div class="v">${money0(a.ing)}</div><div class="d">${deltaTxt(a.ing, p.ing, pl, true)}</div></div>
-    <div class="kpi"><div class="k">Ahorro</div><div class="v">${money0(a.ahorro)}</div><div class="d">${p.ing || p.gas ? `${esc(pl)}: ${money0(p.ahorro)}` : '&nbsp;'}</div></div>
-    <div class="kpi"><div class="k">Tasa de ahorro</div><div class="v">${pct(a.tasa)}</div><div class="d">${isFinite(p.tasa) ? `${esc(pl)}: ${pct(p.tasa)}` : '&nbsp;'}</div></div>`;
+  const cur = monthStart(today()), enCurso = state.mes === cur;
+  const dia = enCurso ? +today().slice(8, 10) : 31;
+  const prev = addMonths(state.mes, -1), pn = mesNombre(prev);
+  const a = monthAgg(state.mes), p = monthAgg(prev, dia), pf = monthAgg(prev);
+  const pl = enCurso ? `el ${dia} de ${pn}` : pn;
+  const k = (label, value, sub) => `<div class="kpi"><div class="k">${label}</div><div class="v">${value}</div><div class="d">${sub || '&nbsp;'}</div></div>`;
+  if (!enComun()) {
+    $('#kpis').innerHTML =
+      k(`Gastos${enCurso ? ' · mes en curso' : ''}`, money0(a.gas), deltaTxt(a.gas, p.gas, pl)) +
+      k('Ingresos', money0(a.ing), deltaTxt(a.ing, p.ing, pl, true)) +
+      k('Aportado a la común', money0(a.apOut), pf.apOut ? `${esc(pn)}: ${money0(pf.apOut)}` : '') +
+      k('Ahorro', sgn0(a.neto), isFinite(a.tasa) ? `Tasa de ahorro: <b>${pct(a.tasa)}</b>` : '');
+  } else {
+    const ids = scopeIds(), o = otro();
+    const por = id => sum(a.ts.filter(t => ids.has(t.a_cuenta) && t.miembro_id === id).map(t => t.importe));
+    $('#kpis').innerHTML =
+      k(`Gastos${enCurso ? ' · mes en curso' : ''}`, money0(a.gas), deltaTxt(a.gas, p.gas, pl)) +
+      k('Aportaciones', money0(a.apIn), deltaTxt(a.apIn, p.apIn, pl, true)) +
+      k('Diferencia', sgn0(a.neto), 'Lo que entra menos lo que sale') +
+      k('Aportado por ti', money0(por(me().id)), o ? `${esc(o.nombre)}: ${money0(por(o.id))}` : '');
+  }
 }
 
 function niceMax(v) {
@@ -599,138 +659,158 @@ function niceMax(v) {
   return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e;
 }
 
+/* Gráfico de líneas genérico (admite huecos con null). */
+function lineChart(el, { labels, series, tip: tipFn, aria, showLabel }) {
+  const n = labels.length;
+  const W = Math.max(320, el.clientWidth || 700), H = W < 520 ? 210 : 250;
+  const m = { t: 22, r: W < 520 ? 76 : 96, b: 26, l: 50 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const all = series.flatMap(s => s.vals.filter(v => v != null));
+  const max = niceMax(Math.max(...all, 1));
+  const x = i => m.l + (n > 1 ? (iw * i) / (n - 1) : iw / 2), y = v => m.t + ih * (1 - v / max);
+  const ticks = [0, .25, .5, .75, 1].map(f => f * max);
+  const path = vals => { let d = '', pen = false; vals.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`; pen = true; }); return d; };
+  const lastIdx = vals => { for (let i = vals.length - 1; i >= 0; i--) if (vals[i] != null) return i; return -1; };
+  const ends = series.map((s, k) => { const i = lastIdx(s.vals); return { s, k, i, v: s.vals[i], yy: i < 0 ? 0 : y(s.vals[i]) }; }).filter(e => e.i >= 0);
+  const right = ends.filter(e => e.i === n - 1);
+  if (right.length === 2 && Math.abs(right[0].yy - right[1].yy) < 30) {
+    const mid = (right[0].yy + right[1].yy) / 2, up = right[0].yy <= right[1].yy ? 0 : 1;
+    right[up].yy = mid - 15; right[1 - up].yy = mid + 15;
+  }
+  const endLabel = e => e.i === n - 1
+    ? `<text class="lbl" x="${x(e.i) + 9}" y="${e.yy - 1}">${esc(e.s.name)}</text><text x="${x(e.i) + 9}" y="${e.yy + 13}">${NUM0.format(Math.round(e.v))} €</text>`
+    : `<text class="lbl" x="${x(e.i)}" y="${e.yy - 10}" text-anchor="middle">${NUM0.format(Math.round(e.v))} €</text>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}">
+    ${ticks.map(t => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" stroke-width="1"/>
+      <text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${NUM0.format(t)}</text>`).join('')}
+    ${labels.map((l, i) => showLabel(i, W) ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${esc(l)}</text>` : '').join('')}
+    <line class="xh" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" stroke="var(--line)" stroke-width="1" visibility="hidden"/>
+    ${series.map(s => `<path d="${path(s.vals)}" fill="none" stroke="${s.color}" stroke-width="2" ${s.dash ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
+    ${ends.map(e => `<circle cx="${x(e.i)}" cy="${y(e.v)}" r="4" fill="${e.s.color}" stroke="var(--surface)" stroke-width="2"/>`).join('')}
+    ${series.map((s, k) => `<circle class="hd" data-k="${k}" r="4.5" fill="${s.color}" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`).join('')}
+    ${ends.map(endLabel).join('')}
+    <rect class="hit" x="${m.l - iw / (2 * Math.max(n - 1, 1))}" y="${m.t}" width="${iw + iw / Math.max(n - 1, 1)}" height="${ih}" fill="transparent"/>
+  </svg>`;
+  const svg = el.querySelector('svg'), hit = svg.querySelector('.hit'), xh = svg.querySelector('.xh'), dots = svg.querySelectorAll('.hd');
+  const move = e => {
+    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * (W / r.width);
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / (iw / Math.max(n - 1, 1)))));
+    xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
+    dots.forEach(c => { const v = series[+c.dataset.k].vals[i]; if (v == null) return c.setAttribute('visibility', 'hidden'); c.setAttribute('cx', x(i)); c.setAttribute('cy', y(v)); c.setAttribute('visibility', 'visible'); });
+    showTip(tipFn(i), e.clientX, e.clientY);
+  };
+  hit.addEventListener('pointermove', move); hit.addEventListener('pointerdown', move);
+  hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); dots.forEach(c => c.setAttribute('visibility', 'hidden')); hideTip(); });
+}
+
+/* Ritmo de gasto: gasto acumulado día a día, este mes frente al anterior. */
+function renderRitmo() {
+  const mes = state.mes, prev = addMonths(mes, -1), cur = monthStart(today()), enCurso = mes === cur;
+  const dia = enCurso ? +today().slice(8, 10) : daysIn(mes);
+  const acum = (mm, hasta) => {
+    const byDay = new Array(daysIn(mm) + 1).fill(0);
+    monthAgg(mm).ms.filter(x => x.tipo === 'gasto').forEach(x => byDay[+x.fecha.slice(8, 10)] += x.importe);
+    const out = []; let s = 0;
+    for (let d = 1; d <= daysIn(mm); d++) { s += byDay[d]; out.push(d <= hasta ? round2(s) : null); }
+    return out;
+  };
+  const n = Math.max(daysIn(mes), daysIn(prev));
+  const pad0 = arr => arr.concat(new Array(n - arr.length).fill(null));
+  const a = pad0(acum(mes, dia)), b = pad0(acum(prev, 31));
+  const nowV = a[dia - 1] ?? 0, prevAt = b[Math.min(dia, daysIn(prev)) - 1] ?? 0, diff = nowV - prevAt;
+  const name = mesNombre(mes), pn = mesNombre(prev);
+  const cmp = Math.abs(diff) < 1 ? `lo mismo que` : `${money0(Math.abs(diff))} ${diff > 0 ? 'más' : 'menos'} que`;
+  $('#ritmoSub').textContent = enCurso
+    ? `Llevas ${money0(nowV)} a día ${dia}: ${cmp} a estas alturas de ${pn}.`
+    : `Cerraste ${name} con ${money0(nowV)}: ${cmp} ${pn}.`;
+  $('#ritmoLegend').innerHTML = `<span><i class="sw line" style="background:var(--s-gastos)"></i>${esc(cap1(name))}</span><span><i class="sw line dash"></i>${esc(cap1(pn))}</span>`;
+  lineChart($('#ritmoChart'), {
+    labels: Array.from({ length: n }, (_, i) => String(i + 1)),
+    series: [{ name: cap1(name), color: 'var(--s-gastos)', vals: a }, { name: cap1(pn), color: 'var(--muted)', vals: b, dash: true }],
+    aria: 'Gasto acumulado por día, este mes y el anterior',
+    showLabel: (i) => i === 0 || (i + 1) % 5 === 0,
+    tip: i => `<div class="h">Día ${i + 1}</div>${a[i] != null ? tipRow('var(--s-gastos)', cap1(name), money0(a[i])) : ''}${b[i] != null ? tipRow('var(--muted)', cap1(pn), money0(b[i]), true) : ''}`,
+  });
+}
+const cap1 = s => s.charAt(0).toUpperCase() + s.slice(1);
+
 function renderEvo() {
   const months = Array.from({ length: 12 }, (_, i) => addMonths(state.mes, i - 11));
   const rows = months.map(m => ({ mes: m, ...monthAgg(m) }));
+  const c = enComun();
+  const s1 = c ? { key: 'entradas', name: 'Aportaciones' } : { key: 'ing', name: 'Ingresos' };
+  $('#evoTitle').textContent = c ? 'Aportaciones y gastos' : 'Ingresos y gastos';
   $('#evoSub').textContent = `${mesLargo(months[0])} – ${mesLargo(months[11])}`;
-  const el = $('#evoChart');
-  const W = Math.max(320, el.clientWidth || 700), H = W < 520 ? 220 : 260;
-  const m = { t: 14, r: W < 520 ? 70 : 92, b: 26, l: 50 };
-  const iw = W - m.l - m.r, ih = H - m.t - m.b;
-  const max = niceMax(Math.max(...rows.map(r => Math.max(r.ing, r.gas)), 1));
-  const x = i => m.l + (iw * i) / 11, y = v => m.t + ih * (1 - v / max);
-  const ticks = [0, .25, .5, .75, 1].map(f => f * max);
-  const series = [
-    { key: 'ing', name: 'Ingresos', color: 'var(--s-ingresos)' },
-    { key: 'gas', name: 'Gastos', color: 'var(--s-gastos)' },
-  ];
-  const path = k => rows.map((r, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`).join('');
-  // etiquetas directas al final, separadas si chocan
-  const ends = series.map(s => ({ ...s, v: rows[11][s.key], yy: y(rows[11][s.key]) }));
-  if (Math.abs(ends[0].yy - ends[1].yy) < 30) {
-    const mid = (ends[0].yy + ends[1].yy) / 2, up = ends[0].yy <= ends[1].yy ? 0 : 1;
-    ends[up].yy = mid - 15; ends[1 - up].yy = mid + 15;
-  }
-  const step = W < 520 ? 2 : 1;
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Ingresos y gastos de los últimos 12 meses">
-    ${ticks.map(t => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" stroke-width="1"/>
-      <text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${NUM0.format(t)}</text>`).join('')}
-    ${rows.map((r, i) => (11 - i) % step === 0 ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${mesCorto(r.mes)}</text>` : '').join('')}
-    <line id="xh" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" stroke="var(--line)" stroke-width="1" visibility="hidden"/>
-    ${series.map(s => `<path d="${path(s.key)}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
-    ${series.map(s => `<circle cx="${x(11)}" cy="${y(rows[11][s.key])}" r="4" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`).join('')}
-    <g id="hdots" visibility="hidden">${series.map(s => `<circle data-k="${s.key}" r="4.5" fill="${s.color}" stroke="var(--surface)" stroke-width="2"/>`).join('')}</g>
-    ${ends.map(s => `<text class="lbl" x="${x(11) + 9}" y="${s.yy - 1}">${s.name}</text><text x="${x(11) + 9}" y="${s.yy + 13}">${NUM0.format(Math.round(s.v))} €</text>`).join('')}
-    <rect id="hit" x="${m.l - iw / 22}" y="${m.t}" width="${iw + iw / 11}" height="${ih}" fill="transparent"/>
-  </svg>`;
-  const svg = el.querySelector('svg'), hit = svg.querySelector('#hit'), xh = svg.querySelector('#xh'), dots = svg.querySelector('#hdots');
-  const idxAt = e => { const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * (W / r.width); return Math.max(0, Math.min(11, Math.round((px - m.l) / (iw / 11)))); };
-  const move = e => {
-    const i = idxAt(e), r = rows[i];
-    xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
-    dots.setAttribute('visibility', 'visible');
-    dots.querySelectorAll('circle').forEach(c => { c.setAttribute('cx', x(i)); c.setAttribute('cy', y(r[c.dataset.k])); });
-    showTip(`<div class="h">${esc(mesLargo(r.mes))}</div>${tipRow('var(--s-ingresos)', 'Ingresos', money0(r.ing))}${tipRow('var(--s-gastos)', 'Gastos', money0(r.gas))}<div class="sep"></div>${tipRow('', 'Ahorro', money0(r.ahorro))}${tipRow('', 'Tasa de ahorro', pct(r.tasa))}`, e.clientX, e.clientY);
-  };
-  hit.addEventListener('pointermove', move); hit.addEventListener('pointerdown', move);
-  hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); dots.setAttribute('visibility', 'hidden'); hideTip(); });
-
-  $('#evoTable').innerHTML = `<table><thead><tr><th>Mes</th><th class="r">Ingresos</th><th class="r">Gastos</th><th class="r">Ahorro</th><th class="r">Tasa</th></tr></thead><tbody>
-    ${rows.slice().reverse().map(r => `<tr><td>${esc(mesLargo(r.mes))}</td><td class="r">${money0(r.ing)}</td><td class="r">${money0(r.gas)}</td><td class="r">${money0(r.ahorro)}</td><td class="r">${pct(r.tasa)}</td></tr>`).join('')}
-  </tbody></table>`;
+  $('#evoLegend').innerHTML = `<span><i class="sw line" style="background:var(--s-ingresos)"></i>${s1.name}</span><span><i class="sw line" style="background:var(--s-gastos)"></i>Gastos</span>`;
+  lineChart($('#evoChart'), {
+    labels: months.map(mesCorto),
+    series: [{ name: s1.name, color: 'var(--s-ingresos)', vals: rows.map(r => r[s1.key]) }, { name: 'Gastos', color: 'var(--s-gastos)', vals: rows.map(r => r.gas) }],
+    aria: `${s1.name} y gastos de los últimos 12 meses`,
+    showLabel: (i, W) => (11 - i) % (W < 520 ? 2 : 1) === 0,
+    tip: i => { const r = rows[i]; return `<div class="h">${esc(mesLargo(r.mes))}</div>${tipRow('var(--s-ingresos)', s1.name, money0(r[s1.key]))}${tipRow('var(--s-gastos)', 'Gastos', money0(r.gas))}<div class="sep"></div>` +
+      (c ? tipRow('', 'Diferencia', sgn0(r.neto)) : `${tipRow('', 'Aportado a la común', money0(r.apOut))}${tipRow('', 'Ahorro', sgn0(r.neto))}${tipRow('', 'Tasa de ahorro', pct(r.tasa))}`); },
+  });
+  $('#evoTable').innerHTML = c
+    ? `<table><thead><tr><th>Mes</th><th class="r">Aportaciones</th><th class="r">Gastos</th><th class="r">Diferencia</th></tr></thead><tbody>
+      ${rows.slice().reverse().map(r => `<tr><td>${esc(mesLargo(r.mes))}</td><td class="r">${money0(r.entradas)}</td><td class="r">${money0(r.gas)}</td><td class="r">${sgn0(r.neto)}</td></tr>`).join('')}</tbody></table>`
+    : `<table><thead><tr><th>Mes</th><th class="r">Ingresos</th><th class="r">Gastos</th><th class="r">A la común</th><th class="r">Ahorro</th><th class="r">Tasa</th></tr></thead><tbody>
+      ${rows.slice().reverse().map(r => `<tr><td>${esc(mesLargo(r.mes))}</td><td class="r">${money0(r.ing)}</td><td class="r">${money0(r.gas)}</td><td class="r">${money0(r.apOut)}</td><td class="r">${sgn0(r.neto)}</td><td class="r">${pct(r.tasa)}</td></tr>`).join('')}</tbody></table>`;
 }
 
 function renderCapital() {
   const cap = state.capital, card = $('#capCard');
-  if (!cap || !cap.saldos.length) { card.hidden = true; return; }
+  const ids = scopeIds();
+  const scope = cap ? cap.saldos.filter(c => ids.has(c.cuenta_id)) : [];
+  if (!scope.length) { card.hidden = true; return; }
   card.hidden = false;
-  const mias = cap.saldos.filter(c => c.titular_id === me().id);
-  const propias = mias.length ? new Set(mias.map(c => c.cuenta_id)) : new Set(cap.saldos.map(c => c.cuenta_id));
-  const scope = mias.length ? cap.saldos.filter(c => propias.has(c.cuenta_id)) : cap.saldos;
-  $('#capTitle').textContent = mias.length ? 'Tu capital' : 'Capital del hogar';
-  const tiene = mes => cap.mensual.some(r => r.mes === mes && propias.has(r.cuenta_id));
-  const at = (mes, set = propias) => sum(cap.mensual.filter(r => r.mes === mes && set.has(r.cuenta_id)).map(r => +r.saldo_fin_mes));
+  $('#capTitle').textContent = enComun() ? 'Saldo de la cuenta común' : 'Tu capital';
+  const tiene = mes => cap.mensual.some(r => r.mes === mes && ids.has(r.cuenta_id));
+  const at = (mes, set = ids) => sum(cap.mensual.filter(r => r.mes === mes && set.has(r.cuenta_id)).map(r => +r.saldo_fin_mes));
   const mes = state.mes, enCurso = mes === monthStart(today());
   const inicio = scope.map(c => c.fecha_saldo_inicial).sort()[0];
   const ini = sum(scope.map(c => +c.saldo_inicial));
+  const fmtF = (f, opt) => new Date(f + 'T12:00:00').toLocaleDateString('es-ES', opt);
 
   $('#capSub').textContent = enCurso ? 'Saldo a día de hoy' : `Saldo a final de ${mesNombre(mes)}`;
   if (!tiene(mes)) {
     $('#capHero').textContent = '—';
-    $('#capDelta').textContent = `Empieza a contar el ${new Date(inicio + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+    $('#capDelta').textContent = `Empieza a contar el ${fmtF(inicio, { day: 'numeric', month: 'long', year: 'numeric' })}.`;
   } else {
     const v = at(mes), prev = addMonths(mes, -1);
     const dm = tiene(prev) ? v - at(prev) : v - ini;
-    const sgn = n => (n >= 0 ? '+' : '−') + money0(Math.abs(n));
+    const sg = n => (n >= 0 ? '+' : '−') + money0(Math.abs(n));
     $('#capHero').textContent = money0(v);
-    $('#capDelta').innerHTML = `<b>${sgn(dm)}</b> ${tiene(prev) ? 'este mes' : 'desde el inicio'} · <b>${sgn(v - ini)}</b> desde ${esc(mesNombre(inicio))} ${inicio.slice(0, 4)}`;
+    $('#capDelta').innerHTML = `<b>${sg(dm)}</b> ${tiene(prev) ? 'este mes' : 'desde el inicio'} · <b>${sg(v - ini)}</b> desde ${esc(mesNombre(inicio))} ${inicio.slice(0, 4)}`;
   }
+  const lista = scope.map(c => ({ c, v: at(mes, new Set([c.cuenta_id])), ok: cap.mensual.some(r => r.mes === mes && r.cuenta_id === c.cuenta_id) })).filter(x => x.ok);
+  $('#capCuentas').innerHTML = lista.length > 1 ? lista.map(x => `<div class="li"><span class="ic">${x.c.tipo === 'ahorro' ? '🏦' : '💳'}</span>
+      <div class="main"><div class="t">${esc(x.c.nombre)}</div></div><span class="amt">${money0(x.v)}</span></div>`).join('') : '';
+  $('#capNote').textContent = `Parte de ${money0(ini)} el ${fmtF(inicio, { day: 'numeric', month: 'short', year: 'numeric' })}. Suma ingresos y aportaciones que entran; resta gastos y aportaciones que salen.`;
 
-  const todas = new Set(cap.saldos.map(c => c.cuenta_id));
-  const lista = cap.saldos.map(c => ({ c, v: at(mes, new Set([c.cuenta_id])), ok: cap.mensual.some(r => r.mes === mes && r.cuenta_id === c.cuenta_id) }))
-    .filter(x => x.ok && (Math.abs(x.v) > 0.005 || +x.c.saldo_inicial));
-  const quien = c => c.titular_id ? nombre(state.cat.miembros.find(m => m.id === c.titular_id) || { id: '', nombre: '' }) : 'Común';
-  $('#capCuentas').innerHTML = lista.map(x => `<div class="li"><span class="ic">${x.c.tipo === 'comun' ? '🤝' : x.c.tipo === 'ahorro' ? '🏦' : '💳'}</span>
-      <div class="main"><div class="t">${esc(x.c.nombre)}</div><div class="s">${esc(quien(x.c))}</div></div><span class="amt">${money0(x.v)}</span></div>`).join('') +
-    (mias.length && lista.length > mias.length ? `<div class="li"><span class="ic">🏠</span><div class="main"><div class="t">Total del hogar</div></div><span class="amt">${money0(at(mes, todas))}</span></div>` : '');
-  $('#capNote').textContent = `Parte de ${money0(ini)} el ${new Date(inicio + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })} y suma ingresos y resta gastos con cuenta asignada.`;
-
-  // Gráfico: 12 meses hasta el mes elegido
   const months = Array.from({ length: 12 }, (_, i) => addMonths(mes, i - 11));
   const vals = months.map(m => tiene(m) ? at(m) : null);
   const el = $('#capChart');
-  const pts = vals.map((v, i) => ({ i, v })).filter(p => p.v !== null);
-  if (pts.length < 2) { el.innerHTML = '<div class="empty">Necesito al menos dos meses para dibujar la evolución.</div>'; return; }
-  const W = Math.max(300, el.clientWidth || 600), H = W < 520 ? 190 : 220;
-  const m = { t: 14, r: W < 520 ? 64 : 80, b: 26, l: 54 };
-  const iw = W - m.l - m.r, ih = H - m.t - m.b;
-  const vmin = Math.min(0, ...pts.map(p => p.v)), max = niceMax(Math.max(...pts.map(p => p.v), 1));
-  const x = i => m.l + (iw * i) / 11, y = v => m.t + ih * (1 - (v - vmin) / (max - vmin));
-  const ticks = [0, .25, .5, .75, 1].map(f => vmin + f * (max - vmin));
-  const last = pts[pts.length - 1], step = W < 520 ? 2 : 1;
-  const col = 'var(--s-m1)';
-  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Evolución del capital">
-    ${ticks.map(t => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)" stroke-width="1"/>
-      <text x="${m.l - 8}" y="${y(t) + 4}" text-anchor="end">${NUM0.format(t)}</text>`).join('')}
-    ${months.map((mo, i) => (11 - i) % step === 0 ? `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${mesCorto(mo)}</text>` : '').join('')}
-    <line id="cxh" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" stroke="var(--line)" stroke-width="1" visibility="hidden"/>
-    <path d="${pts.map((p, k) => `${k ? 'L' : 'M'}${x(p.i).toFixed(1)},${y(p.v).toFixed(1)}`).join('')}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    <circle cx="${x(last.i)}" cy="${y(last.v)}" r="4" fill="${col}" stroke="var(--surface)" stroke-width="2"/>
-    <circle id="cdot" r="4.5" fill="${col}" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>
-    <text class="lbl" x="${x(last.i) + 9}" y="${y(last.v) + 4}">${NUM0.format(Math.round(last.v))} €</text>
-    <rect id="chit" x="${m.l - iw / 22}" y="${m.t}" width="${iw + iw / 11}" height="${ih}" fill="transparent"/>
-  </svg>`;
-  const svg = el.querySelector('svg'), hit = svg.querySelector('#chit'), xh = svg.querySelector('#cxh'), dot = svg.querySelector('#cdot');
-  const move = e => {
-    const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * (W / r.width);
-    const i = Math.max(0, Math.min(11, Math.round((px - m.l) / (iw / 11))));
-    if (vals[i] === null) { xh.setAttribute('visibility', 'hidden'); dot.setAttribute('visibility', 'hidden'); return hideTip(); }
-    xh.setAttribute('x1', x(i)); xh.setAttribute('x2', x(i)); xh.setAttribute('visibility', 'visible');
-    dot.setAttribute('cx', x(i)); dot.setAttribute('cy', y(vals[i])); dot.setAttribute('visibility', 'visible');
-    const d = i > 0 && vals[i - 1] !== null ? vals[i] - vals[i - 1] : null;
-    showTip(`<div class="h">${esc(mesLargo(months[i]))}</div>${tipRow(col, 'Capital', money0(vals[i]))}${d !== null ? tipRow('', 'Cambio en el mes', (d >= 0 ? '+' : '−') + money0(Math.abs(d))) : ''}`, e.clientX, e.clientY);
-  };
-  hit.addEventListener('pointermove', move); hit.addEventListener('pointerdown', move);
-  hit.addEventListener('pointerleave', () => { xh.setAttribute('visibility', 'hidden'); dot.setAttribute('visibility', 'hidden'); hideTip(); });
+  if (vals.filter(v => v != null).length < 2) { el.innerHTML = '<div class="empty">Necesito al menos dos meses para dibujar la evolución.</div>'; return; }
+  const col = enComun() ? 'var(--s-m2)' : 'var(--s-m1)';
+  lineChart(el, {
+    labels: months.map(mesCorto),
+    series: [{ name: 'Saldo', color: col, vals }],
+    aria: 'Evolución del saldo',
+    showLabel: (i, W) => (11 - i) % (W < 520 ? 2 : 1) === 0,
+    tip: i => { if (vals[i] == null) return `<div class="h">${esc(mesLargo(months[i]))}</div>Sin datos`;
+      const d = i > 0 && vals[i - 1] != null ? vals[i] - vals[i - 1] : null;
+      return `<div class="h">${esc(mesLargo(months[i]))}</div>${tipRow(col, 'Saldo', money0(vals[i]))}${d != null ? tipRow('', 'Cambio en el mes', (d >= 0 ? '+' : '−') + money0(Math.abs(d))) : ''}`; },
+  });
 }
 
 function renderCats() {
   const a = monthAgg(state.mes);
-  const prev = [1, 2, 3].map(k => addMonths(state.mes, -k));
+  const prev = [1, 2, 3].map(k => monthAgg(addMonths(state.mes, -k)).ms);
   const by = {};
   a.ms.filter(m => m.tipo === 'gasto').forEach(m => { const k = m.categoria_id || 'x'; by[k] = (by[k] || 0) + m.importe; });
-  const media = id => sum(prev.map(p => sum(state.movs.filter(m => m.mes === p && m.tipo === 'gasto' && (m.categoria_id || 'x') === id).map(m => m.importe)))) / 3;
+  const media = id => sum(prev.map(list => sum(list.filter(m => m.tipo === 'gasto' && (m.categoria_id || 'x') === id).map(m => m.importe)))) / 3;
   const pres = Object.fromEntries(state.pres.map(p => [p.categoria_id, +p.importe]));
+  $('#catSub').textContent = enComun() ? 'La marca vertical es el presupuesto, si lo hay.' : 'Debajo, tu media de los 3 meses anteriores.';
   const ids = new Set([...Object.keys(by), ...Object.keys(pres)]);
   let rows = [...ids].map(id => ({ id, cat: categoria(id) || { nombre: 'Sin categoría', icono: '❔' }, v: by[id] || 0, p: pres[id], avg: media(id) }))
     .filter(r => r.v > 0 || r.p).sort((x, y) => y.v - x.v);
@@ -770,24 +850,35 @@ function renderFijoVar() {
   $$('#fijoVar .segbar>div').forEach(d => { const s = segs.find(x => x.n === d.dataset.n); bindTip(d, () => `<div class="h">${s.n}</div>${tipRow(s.c, 'Importe', money(s.v))}${tipRow('', '% del gasto', pct(s.v / tot, 1))}`); });
 }
 
-function renderPersons() {
-  const gs = monthAgg(state.mes).ms.filter(m => m.tipo === 'gasto');
-  const tot = {}; state.cat.miembros.forEach(m => tot[m.id] = { all: 0, comp: 0 });
-  gs.forEach(mv => { const a = attrib(mv); for (const k in a) { if (!tot[k]) continue; tot[k].all += a[k]; if (mv.ambito === 'compartido' || !mv.pagado_por) tot[k].comp += a[k]; } });
-  const ms = miembrosOrd(), max = Math.max(...ms.map(m => tot[m.id].all), 1);
-  $('#personBars').innerHTML = ms.map(m => `<div class="brow" data-id="${m.id}">
-    <span class="name"><i class="sw" style="background:${memberColor(m.id)}"></i>${esc(nombre(m))}</span><span class="val">${money0(tot[m.id].all)}</span>
-    <div class="track"><div class="fill" style="width:${(tot[m.id].all / max) * 100}%;background:${memberColor(m.id)}"></div></div>
-    <div class="meta">${money0(tot[m.id].comp)} de gastos compartidos · ${money0(tot[m.id].all - tot[m.id].comp)} personales</div>
-  </div>`).join('');
-  $$('#personBars .brow').forEach(el => { const m = ms.find(x => x.id === el.dataset.id), t = tot[m.id];
-    bindTip(el, () => `<div class="h">${esc(m.nombre)}</div>${tipRow(memberColor(m.id), 'Total asumido', money(t.all))}${tipRow('', 'Compartido', money(t.comp))}${tipRow('', 'Personal', money(t.all - t.comp))}`); });
-
-  const mine = state.bal.find(b => b.miembro_id === me().id), other = state.cat.miembros.find(x => x.id !== me().id);
-  const bx = $('#balance');
-  if (mine && other) {
+/* Tarjeta lateral: aportaciones de cada uno (común) o pagos por los dos (mi cuenta). */
+function renderSide() {
+  const a = monthAgg(state.mes), bx = $('#balance'), ms = miembrosOrd();
+  if (enComun()) {
+    const ids = scopeIds();
+    const tot = Object.fromEntries(ms.map(m => [m.id, sum(a.ts.filter(t => ids.has(t.a_cuenta) && t.miembro_id === m.id).map(t => t.importe))]));
+    const all = sum(Object.values(tot)), max = Math.max(...Object.values(tot), 1);
+    $('#sideTitle').textContent = 'Aportaciones del mes';
+    $('#sideSub').textContent = all ? `Entre los dos: ${money0(all)}.` : 'Aún no hay aportaciones este mes.';
+    $('#personBars').innerHTML = ms.map(m => `<div class="brow" data-id="${m.id}">
+      <span class="name"><i class="sw" style="background:${memberColor(m.id)}"></i>${esc(nombre(m))}</span><span class="val">${money0(tot[m.id])}</span>
+      <div class="track"><div class="fill" style="width:${(tot[m.id] / max) * 100}%;background:${memberColor(m.id)}"></div></div>
+      <div class="meta">${all ? pct(tot[m.id] / all) + ' del total' : '&nbsp;'}</div></div>`).join('');
+    $$('#personBars .brow').forEach(el => { const m = ms.find(x => x.id === el.dataset.id);
+      bindTip(el, () => `<div class="h">${esc(m.nombre)}</div>${tipRow(memberColor(m.id), 'Aportado', money(tot[m.id]))}${tipRow('', '% del total', all ? pct(tot[m.id] / all, 1) : '—')}`); });
+    bx.hidden = true;
+    return;
+  }
+  const comp = a.ms.filter(m => m.tipo === 'gasto' && m.ambito === 'compartido' && m.pagado_por === me().id);
+  const o = otro();
+  $('#sideTitle').textContent = 'Pagos por los dos';
+  $('#sideSub').textContent = comp.length
+    ? `Este mes has pagado ${money0(sum(comp.map(m => m.importe)))} de gastos compartidos desde tu cuenta${o ? `; la parte de ${o.nombre} es ${money0(sum(comp.map(m => m.importe * (1 - m.pct_pagador))))}` : ''}.`
+    : 'Este mes no has pagado gastos compartidos desde tu cuenta.';
+  $('#personBars').innerHTML = '';
+  const mine = state.bal.find(b => b.miembro_id === me().id);
+  if (mine && o) {
     const s = +mine.saldo;
-    const big = Math.abs(s) < 0.005 ? 'Estáis en paz' : s > 0 ? `${other.nombre} te debe ${money(s)}` : `Debes ${money(-s)} a ${other.nombre}`;
+    const big = Math.abs(s) < 0.005 ? 'Estáis en paz' : s > 0 ? `${o.nombre} te debe ${money(s)}` : `Debes ${money(-s)} a ${o.nombre}`;
     bx.innerHTML = `<span class="dot">⇄</span><div><div class="big">${esc(big)}</div><div class="sm">Saldo acumulado de gastos compartidos y liquidaciones.</div></div>`;
     bx.hidden = false;
   } else bx.hidden = true;
@@ -798,10 +889,10 @@ function renderTop() {
   if (!gs.length) { $('#topList').innerHTML = '<div class="empty">Sin gastos este mes.</div>'; return; }
   $('#topList').innerHTML = gs.map(m => {
     const c = categoria(m.categoria_id) || { nombre: 'Sin categoría', icono: '❔' };
-    const quien = m.pagado_por ? nombre(state.cat.miembros.find(x => x.id === m.pagado_por)) : 'Cuenta común';
     const f = new Date(m.fecha + 'T12:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const extra = !enComun() && m.ambito === 'compartido' ? ' · compartido' : '';
     return `<div class="li"><span class="ic">${esc(c.icono)}</span><div class="main"><div class="t">${esc(m.descripcion || c.nombre)}</div>
-      <div class="s">${esc(c.nombre)} · ${esc(quien)} · ${esc(f)}${m.ambito === 'compartido' ? ' · compartido' : ''}</div></div><span class="amt">${money(m.importe)}</span></div>`;
+      <div class="s">${esc(c.nombre)} · ${esc(f)}${extra}</div></div><span class="amt">${money(m.importe)}</span></div>`;
   }).join('');
 }
 
@@ -810,19 +901,40 @@ function bindGeneral() {
   $('#prevMes').addEventListener('click', () => { state.mes = addMonths(state.mes, -1); renderResumen(); });
   $('#nextMes').addEventListener('click', () => { state.mes = addMonths(state.mes, 1); renderResumen(); });
   $('#catMore').addEventListener('click', () => { state.catAll = !state.catAll; renderCats(); });
+  $('#scopeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || b.dataset.v === state.scope) return; state.scope = b.dataset.v; lsSet('fin_rep_scope', state.scope); state.catAll = false; renderResumen(); });
   $('#avatar').addEventListener('click', e => { e.stopPropagation(); $('#menu').hidden = !$('#menu').hidden; });
   document.addEventListener('click', () => $('#menu').hidden = true);
   document.addEventListener('scroll', hideTip, { passive: true });
   $('#logout').addEventListener('click', () => api.signOut());
-  $('#loginBtn').addEventListener('click', async () => {
-    const email = $('#loginEmail').value.trim();
+  let loginEmail = '';
+  $('#loginEmail').value = lsGet('fin_email') || '';
+  const send = async () => {
+    const email = $('#loginEmail').value.trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(email)) return toast('Escribe un email válido', 'err');
-    $('#loginBtn').disabled = true;
-    try { await api.signIn(email); $('#loginMsg').textContent = `Te hemos enviado un enlace a ${email}.`; }
-    catch (e) { $('#loginMsg').textContent = 'No se pudo enviar el enlace: ' + e.message; }
+    $('#loginBtn').disabled = true; $('#loginMsg').textContent = '';
+    try {
+      await api.signIn(email); loginEmail = email; lsSet('fin_email', email);
+      $('#codeTxt').textContent = `Te lo hemos enviado a ${email}. Escríbelo aquí, sin salir de la app.`;
+      $('#loginStep1').hidden = true; $('#loginStep2').hidden = false; $('#loginCode').value = '';
+      setTimeout(() => $('#loginCode').focus(), 50);
+    } catch (e) { $('#loginMsg').textContent = 'No se pudo enviar el código: ' + e.message; }
     finally { $('#loginBtn').disabled = false; }
-  });
-  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (state.started) { renderEvo(); renderCapital(); } }, 150); });
+  };
+  const verify = async () => {
+    const token = $('#loginCode').value.replace(/\D/g, '');
+    if (token.length < 6) return toast('El código tiene al menos 6 cifras', 'err');
+    $('#codeBtn').disabled = true; $('#loginMsg').textContent = '';
+    try { await api.verify(loginEmail, token); }
+    catch (e) { $('#loginMsg').textContent = 'Código no válido o caducado. Pide otro. (' + e.message + ')'; }
+    finally { $('#codeBtn').disabled = false; }
+  };
+  $('#loginBtn').addEventListener('click', send);
+  $('#loginEmail').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  $('#codeBtn').addEventListener('click', verify);
+  $('#loginCode').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
+  $('#loginCode').addEventListener('keydown', e => { if (e.key === 'Enter') verify(); });
+  $('#codeBack').addEventListener('click', () => { $('#loginStep1').hidden = false; $('#loginStep2').hidden = true; $('#loginMsg').textContent = ''; });
+  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (state.started) { renderRitmo(); renderEvo(); renderCapital(); } }, 150); });
 }
 
 bindGeneral();
