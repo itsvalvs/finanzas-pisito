@@ -277,6 +277,11 @@ tbody tr.click:hover td{background:var(--surface-2)}
         <p class="note" id="capNote"></p>
       </div>
 
+      <div class="card span-12" id="objCard" hidden>
+        <div class="cardhead"><div><h2>Objetivos de ahorro</h2><div class="sub" id="objSub"></div></div></div>
+        <div class="bars" id="objBars"></div>
+      </div>
+
       <div class="card span-12">
         <div class="cardhead">
           <div><h2>Ritmo de gasto</h2><div class="sub" id="ritmoSub"></div></div>
@@ -427,14 +432,21 @@ function demoApi() {
     add(day(14), 'gasto', 'Coche', between(60, 110), 'Gasolina', 'a3');
     if (rnd() > 0.5) add(day(21), 'gasto', 'Ropa', between(25, 80), 'PRIMARK', 'a3');
   }
-  const presupuestos = ['Súper:320', 'Restaurantes:150', 'Ocio:80', 'Suministros:110']
-    .map(s => { const [n, v] = s.split(':'); return { categoria_id: cid(n), importe: +v }; });
+  const presupuestos = [
+    ...['Súper:320', 'Restaurantes:150', 'Ocio:80', 'Suministros:110'].map(s => { const [n, v] = s.split(':'); return { categoria_id: cid(n), importe: +v, ambito: 'comun', miembro_id: null, mes: addMonths(cur, -12) }; }),
+    ...['Ropa:60', 'Restaurantes:40'].map(s => { const [n, v] = s.split(':'); return { categoria_id: cid(n), importe: +v, ambito: 'personal', miembro_id: 'm1', mes: addMonths(cur, -12) }; }),
+  ];
+  const objetivos = [
+    { id: 'o1', nombre: 'Fianza del piso', icono: '🏠', importe_objetivo: 2400, ahorrado: 900, fecha_objetivo: addMonths(cur, 5), ambito: 'compartido', miembro_id: null },
+    { id: 'o2', nombre: 'Viaje a Japón', icono: '✈️', importe_objetivo: 3000, ahorrado: 550, fecha_objetivo: null, ambito: 'personal', miembro_id: 'm1' },
+  ];
   return {
     mode: 'demo', onAuth() {}, async signOut() {},
     async catalog() { return { hogar, me: miembros[0], email: 'modo demo', miembros, categorias, cuentas }; },
     async movs(desde, hasta) { return movs.filter(m => m.fecha >= desde && m.fecha < hasta); },
     async trs(desde, hasta) { return trs.filter(x => x.fecha >= desde && x.fecha < hasta); },
     async presupuestos() { return presupuestos.map(p => ({ ...p })); },
+    async objetivos() { return objetivos.map(o => ({ ...o })); },
     async capital() {
       const ini = addMonths(cur, -12);
       const base = { a1: 1000, a2: 20000, a3: 6000 };
@@ -497,9 +509,10 @@ function supaApi() {
       return paged(() => sb.from('v_movimientos').select(COLS).eq('hogar_id', hogarId).gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id'));
     },
     async trs(desde, hasta) {
-      return paged(() => sb.from('transferencias').select('id,fecha,de_cuenta,a_cuenta,importe,miembro_id,nota').eq('hogar_id', hogarId).gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id'));
+      return paged(() => sb.from('transferencias').select('id,fecha,de_cuenta,a_cuenta,importe,miembro_id,nota,liquidacion_id').eq('hogar_id', hogarId).eq('anulado', false).gte('fecha', desde).lt('fecha', hasta).order('fecha').order('id'));
     },
-    async presupuestos(mes) { return ok(await sb.from('presupuestos').select('categoria_id,importe').eq('hogar_id', hogarId).eq('mes', mes)); },
+    async presupuestos() { return ok(await sb.from('presupuestos').select('categoria_id,importe,mes,ambito,miembro_id').eq('hogar_id', hogarId).order('mes')); },
+    async objetivos() { return ok(await sb.from('v_objetivos').select('*').eq('hogar_id', hogarId).eq('activo', true).order('created_at')); },
     async capital() {
       const [saldos, mensual] = await Promise.all([
         sb.from('v_saldo_cuentas').select('*').eq('hogar_id', hogarId).order('nombre').then(ok),
@@ -516,7 +529,7 @@ let api;
 const state = {
   started: false, cat: null, capital: null,
   mes: monthStart(today()), scope: lsGet('fin_rep_scope') === 'comun' ? 'comun' : 'mia',
-  movs: [], trs: [], pres: [], bal: [], catAll: false,
+  movs: [], trs: [], pres: [], presAll: [], objs: [], bal: [], catAll: false,
 };
 const me = () => state.cat.me;
 const otro = () => state.cat.miembros.find(m => m.id !== me().id);
@@ -553,8 +566,9 @@ async function start() {
   try {
     state.cat = await api.catalog();
     const desde = addMonths(monthStart(today()), -24), hasta = addMonths(monthStart(today()), 1);
-    [state.movs, state.trs, state.bal, state.capital] = await Promise.all([
+    [state.movs, state.trs, state.bal, state.capital, state.presAll, state.objs] = await Promise.all([
       api.movs(desde, hasta), api.trs(desde, hasta).catch(() => []), api.balance(), api.capital(),
+      api.presupuestos().catch(() => []), api.objetivos().catch(() => []),
     ]);
     state.movs.forEach(m => { m.importe = +m.importe; m.pct_pagador = +m.pct_pagador; m.mes = m.mes || monthStart(m.fecha); });
     state.trs.forEach(t => { t.importe = +t.importe; });
@@ -604,9 +618,34 @@ function monthAgg(mes, hastaDia = 31) {
   const ing = sum(ms.filter(m => m.tipo === 'ingreso').map(m => m.importe));
   const gas = sum(ms.filter(m => m.tipo === 'gasto').map(m => m.importe));
   const apIn = sum(ts.filter(t => ids.has(t.a_cuenta)).map(t => t.importe));
-  const apOut = sum(ts.filter(t => ids.has(t.de_cuenta)).map(t => t.importe));
-  const neto = ing + apIn - gas - apOut;
+  const cid = comun()?.id;
+  const salidas = sum(ts.filter(t => ids.has(t.de_cuenta)).map(t => t.importe));
+  const apOut = sum(ts.filter(t => ids.has(t.de_cuenta) && t.a_cuenta === cid).map(t => t.importe));
+  const neto = ing + apIn - gas - salidas;
   return { ms, ts, ing, gas, apIn, apOut, neto, entradas: ing + apIn, tasa: ing ? neto / ing : NaN };
+}
+
+/* Presupuesto que rige en el mes para la cuenta elegida (el último fijado antes o en ese mes). */
+function presVigentes(mes) {
+  const by = {};
+  state.presAll.filter(p => enComun() ? (p.ambito || 'comun') === 'comun' : (p.ambito === 'personal' && p.miembro_id === me().id))
+    .filter(p => p.mes <= mes).sort((a, b) => a.mes.localeCompare(b.mes)).forEach(p => by[p.categoria_id] = +p.importe);
+  return Object.entries(by).filter(([, v]) => v > 0).map(([categoria_id, importe]) => ({ categoria_id, importe }));
+}
+
+function renderObjetivos() {
+  const objs = state.objs.filter(o => enComun() ? o.ambito === 'compartido' : (o.ambito === 'personal' && o.miembro_id === me().id));
+  const card = $('#objCard');
+  card.hidden = !objs.length;
+  if (!objs.length) return;
+  $('#objSub').textContent = enComun() ? 'Los que compartís' : 'Los tuyos';
+  $('#objBars').innerHTML = objs.map(o => {
+    const ah = +o.ahorrado, obj = +o.importe_objetivo, r = Math.max(0, Math.min(1, ah / obj)), falta = Math.max(0, obj - ah);
+    const fecha = o.fecha_objetivo ? ` · para ${mesNombre(monthStart(o.fecha_objetivo))} ${o.fecha_objetivo.slice(0, 4)}` : '';
+    return `<div class="brow"><span class="name">${esc(o.icono || '🎯')} ${esc(o.nombre)}</span><span class="val">${money0(ah)} <span style="color:var(--muted);font-weight:600">de ${money0(obj)}</span></span>
+      <div class="track"><div class="fill" style="width:${r * 100}%;background:var(--s-c3);border-radius:4px"></div></div>
+      <div class="meta">${pct(ah / obj)}${falta ? ` · faltan ${money0(falta)}` : ' · ¡conseguido!'}${esc(fecha)}</div></div>`;
+  }).join('');
 }
 
 async function renderResumen() {
@@ -616,8 +655,8 @@ async function renderResumen() {
   $('#prevMes').disabled = mes <= addMonths(cur, -23);
   $$('#scopeSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.scope));
   $('#viewTitle').textContent = enComun() ? 'Cuenta común' : 'Mi cuenta';
-  try { state.pres = enComun() ? await api.presupuestos(mes) : []; } catch { state.pres = []; }
-  renderKpis(); renderCapital(); renderRitmo(); renderEvo(); renderCats(); renderFijoVar(); renderSide(); renderTop();
+  state.pres = presVigentes(mes);
+  renderKpis(); renderCapital(); renderObjetivos(); renderRitmo(); renderEvo(); renderCats(); renderFijoVar(); renderSide(); renderTop();
 }
 
 function deltaTxt(a, b, label, invertGood) {
@@ -810,7 +849,7 @@ function renderCats() {
   a.ms.filter(m => m.tipo === 'gasto').forEach(m => { const k = m.categoria_id || 'x'; by[k] = (by[k] || 0) + m.importe; });
   const media = id => sum(prev.map(list => sum(list.filter(m => m.tipo === 'gasto' && (m.categoria_id || 'x') === id).map(m => m.importe)))) / 3;
   const pres = Object.fromEntries(state.pres.map(p => [p.categoria_id, +p.importe]));
-  $('#catSub').textContent = enComun() ? 'La marca vertical es el presupuesto, si lo hay.' : 'Debajo, tu media de los 3 meses anteriores.';
+  $('#catSub').textContent = 'La marca vertical es el presupuesto, si lo hay. Sin presupuesto, se compara con la media de 3 meses.';
   const ids = new Set([...Object.keys(by), ...Object.keys(pres)]);
   let rows = [...ids].map(id => ({ id, cat: categoria(id) || { nombre: 'Sin categoría', icono: '❔' }, v: by[id] || 0, p: pres[id], avg: media(id) }))
     .filter(r => r.v > 0 || r.p).sort((x, y) => y.v - x.v);
