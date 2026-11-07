@@ -53,7 +53,8 @@ button{cursor:pointer;border:0;background:none}
 
 /* Cabecera */
 .top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 0 12px}
-.toprow{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.toprow h1{min-width:0}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .avatar{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:800;font-size:16px;display:grid;place-items:center}
@@ -196,6 +197,8 @@ tbody tr.click:hover td{background:var(--surface-2)}
 .code{text-align:center;font-size:26px;font-weight:800;letter-spacing:.3em;font-variant-numeric:tabular-nums}
 .menu a{display:block;width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700;color:inherit;text-decoration:none}
 .menu a:hover{background:var(--surface-2)}
+.menu a.menucta{background:var(--accent);color:var(--on-accent);text-align:center;margin-bottom:6px}
+.menu a.menucta:hover{background:var(--accent);opacity:.9}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:12px;font-weight:700;font-size:14px;transition:opacity .2s,transform .2s;z-index:70}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .toast.err{background:var(--critical);color:#fff}
@@ -204,16 +207,14 @@ tbody tr.click:hover td{background:var(--surface-2)}
 <body>
 <div id="app">
   <header class="top">
+    <div class="eyebrow" id="hogarName">Finanzas</div>
     <div class="toprow">
-      <div>
-        <div class="eyebrow" id="hogarName">Finanzas</div>
-        <h1 id="viewTitle">Informe</h1>
-      </div>
+      <h1 id="viewTitle">Informe</h1>
       <div class="who" id="who" hidden>
         <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
         <div class="menu" id="menu" hidden>
           <div class="em" id="menuEmail"></div>
-          <a href="./">Añadir gastos</a>
+          <a class="menucta" href="./">➕ Introducir gastos</a>
           <button id="logout">Cerrar sesión</button>
         </div>
       </div>
@@ -316,6 +317,7 @@ tbody tr.click:hover td{background:var(--surface-2)}
         <div class="sub" id="sideSub"></div>
         <div class="bars" id="personBars" style="margin-top:14px"></div>
         <div class="balance" id="balance" hidden></div>
+        <div id="prestRep"></div>
       </div>
 
       <div class="card span-12">
@@ -447,6 +449,15 @@ function demoApi() {
     async trs(desde, hasta) { return trs.filter(x => x.fecha >= desde && x.fecha < hasta); },
     async presupuestos() { return presupuestos.map(p => ({ ...p })); },
     async objetivos() { return objetivos.map(o => ({ ...o })); },
+    async deudores() {
+      const f = n => { const d = new Date(); d.setDate(d.getDate() - n); return isoDate(d); };
+      return [
+        { id: 'd1', nombre: 'Mi hermana', descripcion: 'Regalo cumple de Lucía', fecha: f(2), importe: 60, cobrado: 0, pendiente: 60, cuenta_id: 'a2' },
+        { id: 'd2', nombre: 'Luis', descripcion: 'Merienda en Getxo', fecha: f(1), importe: 12, cobrado: 0, pendiente: 12, cuenta_id: 'a2' },
+        { id: 'd3', nombre: 'Marta', descripcion: 'Merienda en Getxo', fecha: f(1), importe: 12, cobrado: 0, pendiente: 12, cuenta_id: 'a2' },
+        { id: 'd4', nombre: 'Ana', descripcion: 'Merienda en Getxo', fecha: f(1), importe: 12, cobrado: 12, pendiente: 0, cuenta_id: 'a2' },
+      ];
+    },
     async capital() {
       const ini = addMonths(cur, -12);
       const base = { a1: 1000, a2: 20000, a3: 6000 };
@@ -513,6 +524,7 @@ function supaApi() {
     },
     async presupuestos() { return ok(await sb.from('presupuestos').select('categoria_id,importe,mes,ambito,miembro_id').eq('hogar_id', hogarId).order('mes')); },
     async objetivos() { return ok(await sb.from('v_objetivos').select('*').eq('hogar_id', hogarId).eq('activo', true).order('created_at')); },
+    async deudores() { return ok(await sb.from('v_adelanto_deudores').select('*').eq('hogar_id', hogarId).order('fecha', { ascending: false })); },
     async capital() {
       const [saldos, mensual] = await Promise.all([
         sb.from('v_saldo_cuentas').select('*').eq('hogar_id', hogarId).order('nombre').then(ok),
@@ -529,7 +541,7 @@ let api;
 const state = {
   started: false, cat: null, capital: null,
   mes: monthStart(today()), scope: lsGet('fin_rep_scope') === 'comun' ? 'comun' : 'mia',
-  movs: [], trs: [], pres: [], presAll: [], objs: [], bal: [], catAll: false,
+  movs: [], trs: [], pres: [], presAll: [], objs: [], deud: [], bal: [], catAll: false,
 };
 const me = () => state.cat.me;
 const otro = () => state.cat.miembros.find(m => m.id !== me().id);
@@ -566,9 +578,9 @@ async function start() {
   try {
     state.cat = await api.catalog();
     const desde = addMonths(monthStart(today()), -24), hasta = addMonths(monthStart(today()), 1);
-    [state.movs, state.trs, state.bal, state.capital, state.presAll, state.objs] = await Promise.all([
+    [state.movs, state.trs, state.bal, state.capital, state.presAll, state.objs, state.deud] = await Promise.all([
       api.movs(desde, hasta), api.trs(desde, hasta).catch(() => []), api.balance(), api.capital(),
-      api.presupuestos().catch(() => []), api.objetivos().catch(() => []),
+      api.presupuestos().catch(() => []), api.objetivos().catch(() => []), api.deudores().catch(() => []),
     ]);
     state.movs.forEach(m => { m.importe = +m.importe; m.pct_pagador = +m.pct_pagador; m.mes = m.mes || monthStart(m.fecha); });
     state.trs.forEach(t => { t.importe = +t.importe; });
@@ -819,7 +831,9 @@ function renderCapital() {
     const dm = tiene(prev) ? v - at(prev) : v - ini;
     const sg = n => (n >= 0 ? '+' : '−') + money0(Math.abs(n));
     $('#capHero').textContent = money0(v);
-    $('#capDelta').innerHTML = `<b>${sg(dm)}</b> ${tiene(prev) ? 'este mes' : 'desde el inicio'} · <b>${sg(v - ini)}</b> desde ${esc(mesNombre(inicio))} ${inicio.slice(0, 4)}`;
+    const teDeben = sum(state.deud.filter(d => ids.has(d.cuenta_id)).map(d => +d.pendiente));
+    $('#capDelta').innerHTML = `<b>${sg(dm)}</b> ${tiene(prev) ? 'este mes' : 'desde el inicio'} · <b>${sg(v - ini)}</b> desde ${esc(mesNombre(inicio))} ${inicio.slice(0, 4)}`
+      + (teDeben > 0.004 ? `<br>Además te deben <b>${money0(teDeben)}</b> de préstamos` : '');
   }
   const lista = scope.map(c => ({ c, v: at(mes, new Set([c.cuenta_id])), ok: cap.mensual.some(r => r.mes === mes && r.cuenta_id === c.cuenta_id) })).filter(x => x.ok);
   $('#capCuentas').innerHTML = lista.length > 1 ? lista.map(x => `<div class="li"><span class="ic">${x.c.tipo === 'ahorro' ? '🏦' : '💳'}</span>
@@ -890,7 +904,28 @@ function renderFijoVar() {
 }
 
 /* Tarjeta lateral: aportaciones de cada uno (común) o pagos por los dos (mi cuenta). */
+/* Préstamos: lo adelantado que te tienen que devolver (no cuenta como gasto). */
+function renderPrestamos() {
+  const ids = scopeIds(), a = monthAgg(state.mes);
+  const ds = state.deud.filter(d => ids.has(d.cuenta_id) && +d.pendiente > 0.004);
+  const mesMovs = state.movs.filter(m => m.mes === state.mes && ids.has(m.cuenta_id));
+  const prestado = sum(mesMovs.filter(m => m.tipo === 'adelanto').map(m => m.importe));
+  const devuelto = sum(mesMovs.filter(m => m.tipo === 'devolucion' && m.origen !== 'auto').map(m => m.importe));
+  const el = $('#prestRep');
+  if (!ds.length && !prestado && !devuelto) { el.innerHTML = ''; return; }
+  const por = {};
+  ds.forEach(d => por[d.nombre] = (por[d.nombre] || 0) + +d.pendiente);
+  const filas = Object.entries(por).sort((x, y) => y[1] - x[1]);
+  const max = Math.max(...filas.map(f => f[1]), 1), tot = sum(filas.map(f => f[1]));
+  el.innerHTML = `<h2 style="margin-top:24px">Préstamos por cobrar</h2>
+    <div class="sub">Lo que adelantas por otros no cuenta como gasto.${prestado || devuelto ? ` Este mes: prestado ${money0(prestado)} · devuelto ${money0(devuelto)}.` : ''}</div>
+    ${filas.length ? `<div class="bars" style="margin-top:14px">${filas.map(([n, v]) => `<div class="brow"><span class="name">${esc(n)}</span><span class="val">${money0(v)}</span>
+      <div class="track"><div class="fill" style="width:${(v / max) * 100}%;background:var(--s-c4)"></div></div></div>`).join('')}</div>
+      <div class="note">Total pendiente: <b>${money(tot)}</b></div>` : '<div class="note">Nadie te debe nada ahora mismo.</div>'}`;
+}
+
 function renderSide() {
+  renderPrestamos();
   const a = monthAgg(state.mes), bx = $('#balance'), ms = miembrosOrd();
   if (enComun()) {
     const ids = scopeIds();
