@@ -312,6 +312,8 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .ev .t{font-weight:700}
 .ev .s{font-size:12.5px;color:var(--muted)}
 .linkin{font-weight:800;color:var(--accent)}
+.hastarow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.hastarow .ghost{white-space:nowrap}
 .fab{position:fixed;right:max(16px, calc(50% - 244px));bottom:calc(84px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-size:30px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,.25);z-index:20}
 .parasel{display:flex;flex-wrap:wrap;gap:6px}
 .parasel button{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border-radius:99px;background:var(--surface-2);font-weight:700;font-size:14px;border:1.5px solid transparent}
@@ -525,7 +527,7 @@ function demoApi() {
   let eventos = [
     { id: 'e1', titulo: 'Cena con Ane y Jon', fecha: addDays(t, 2), hora: '21:00', para: 'juntos', repetir: 'no' },
     { id: 'e2', titulo: 'Dentista', fecha: addDays(t, 4), hora: '17:30', para: 'miembro', miembro_id: 'm1', repetir: 'no' },
-    { id: 'e3', titulo: 'Fútbol', fecha: addDays(lun, 1), hora: '20:00', para: 'miembro', miembro_id: 'm2', repetir: 'semanal' },
+    { id: 'e3', titulo: 'Fútbol', fecha: addDays(lun, 1), hora: '20:00', para: 'miembro', miembro_id: 'm2', repetir: 'semanal', hasta: addDays(lun, 16) },
     { id: 'e4', titulo: 'Seguro del coche', fecha: addDays(t, 9), para: 'casa', repetir: 'anual', importe: 320 },
     { id: 'e5', titulo: 'ITV', fecha: addDays(t, 18), para: 'miembro', miembro_id: 'm2', repetir: 'no' },
     { id: 'e6', titulo: 'Escapada a Cantabria', fecha: addDays(t, 12), para: 'juntos', repetir: 'no', nota: 'Reservar casa rural' },
@@ -816,7 +818,7 @@ function evHTML(o) {
   const e = o.e;
   return `<button class="ev" data-ev="${e.id}"><span class="evbar" style="background:${o.color}"></span>
     <span class="main"><span class="t">${esc(e.titulo)}</span>
-      <span class="s">${e.hora ? esc(e.hora.slice(0, 5)) + ' · ' : ''}${esc(etiquetaDe(e))}${e.importe ? ' · ' + money(+e.importe) : ''}${e.repetir !== 'no' ? ' · ↻ ' + esc(REPETIR[e.repetir].toLowerCase()) : ''}${e.nota ? ' · ' + esc(e.nota) : ''}</span></span></button>`;
+      <span class="s">${e.hora ? esc(e.hora.slice(0, 5)) + ' · ' : ''}${esc(etiquetaDe(e))}${e.importe ? ' · ' + money(+e.importe) : ''}${e.repetir !== 'no' ? ' · ↻ ' + esc(REPETIR[e.repetir].toLowerCase()) + (e.hasta ? ' hasta el ' + esc(diaMes(e.hasta)) : '') : ''}${e.nota ? ' · ' + esc(e.nota) : ''}</span></span></button>`;
 }
 function openEvento(e, fecha) {
   const nuevo = !e;
@@ -837,6 +839,10 @@ function openEvento(e, fecha) {
       <div><label class="fl" for="fRep">Se repite</label><select class="field" id="fRep">${Object.entries(REPETIR).map(([k, v]) => `<option value="${k}" ${k === e.repetir ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
       <div><label class="fl" for="fImp">Importe (opcional)</label><div class="inp"><input class="field" id="fImp" inputmode="decimal" value="${esc(fmtInput(+e.importe || 0))}"><i>€</i></div></div>
     </div>
+    <div id="fHastaBox" ${e.repetir === 'no' ? 'hidden' : ''}>
+      <label class="fl" for="fHasta">Termina el (opcional)</label>
+      <div class="hastarow"><input class="field" type="date" id="fHasta" value="${esc(e.hasta || '')}" min="${esc(e.fecha)}"><button class="ghost" id="fHastaX" type="button">Sin fin</button></div>
+    </div>
     <label class="fl" for="fNota">Nota</label>
     <input class="field" id="fNota" value="${esc(e.nota || '')}" maxlength="120" placeholder="Opcional">
     <div class="mbtns">
@@ -849,14 +855,19 @@ function openEvento(e, fecha) {
     state.modalCtx.e.para = b.dataset.p; state.modalCtx.e.miembro_id = b.dataset.m || null;
     $$('#fPara button').forEach(x => x.classList.toggle('on', x === b));
   });
+  $('#fRep').addEventListener('change', ev => { $('#fHastaBox').hidden = ev.target.value === 'no'; });
+  $('#fFecha').addEventListener('change', ev => { $('#fHasta').min = ev.target.value; });
+  $('#fHastaX').addEventListener('click', () => { $('#fHasta').value = ''; });
   if (nuevo) setTimeout(() => $('#fTit').focus(), 80);
 }
 async function saveEvento(b) {
   const { e } = state.modalCtx, tit = $('#fTit').value.trim(), fecha = $('#fFecha').value;
   if (!tit) return toast('Escribe qué es', 'err');
   if (!fecha) return toast('Elige el día', 'err');
+  const rep = $('#fRep').value, hasta = rep === 'no' ? null : ($('#fHasta').value || null);
+  if (hasta && hasta < fecha) return toast('La fecha de fin tiene que ser después del primer día', 'err');
   const row = { id: e.id, titulo: tit, fecha, hora: $('#fHora').value || null, para: e.para, miembro_id: e.para === 'miembro' ? e.miembro_id : null,
-    repetir: $('#fRep').value, importe: amountOf($('#fImp')) || null, nota: $('#fNota').value.trim() || null };
+    repetir: rep, hasta, importe: amountOf($('#fImp')) || null, nota: $('#fNota').value.trim() || null };
   b.disabled = true;
   try { await api.saveEvento(row); closeModal(); toast('Guardado'); state.calSel = fecha; state.calMes = monthStart(fecha); loadCal(); }
   catch (err) { toast(err.message, 'err'); b.disabled = false; }
