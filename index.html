@@ -44,7 +44,9 @@ a{color:inherit;text-decoration:none}
 body[data-bar="1"] #app{padding-bottom:calc(168px + env(safe-area-inset-bottom))}
 
 /* Cabecera */
-.top{position:sticky;top:0;z-index:20;background:var(--bg);display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:calc(14px + env(safe-area-inset-top)) 0 12px}
+.top{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 0 12px}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:40px}
+.toprow h1{min-width:0}
 .eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .who{position:relative}
@@ -53,6 +55,8 @@ h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .menu .em{font-size:13px;color:var(--muted);padding:6px 8px 8px;border-bottom:1px solid var(--line);margin-bottom:6px;word-break:break-all}
 .menu button,.menu a{display:block;width:100%;text-align:left;padding:9px 8px;border-radius:8px;font-weight:700}
 .menu button:hover,.menu a:hover{background:var(--surface-2)}
+.menu a.menucta{background:var(--accent);color:var(--on-accent);text-align:center;margin-bottom:6px}
+.menu a.menucta:hover{background:var(--accent);opacity:.9}
 
 .demo{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.4;background:color-mix(in srgb,var(--warn) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);padding:10px 12px;border-radius:var(--r-sm);margin-bottom:6px}
 .demo b{color:var(--warn)}
@@ -64,6 +68,7 @@ h1{font-size:25px;font-weight:800;letter-spacing:-.025em;line-height:1.15}
 .seg button:disabled{opacity:.4;cursor:not-allowed}
 #tipoSeg button.on[data-v="gasto"]{color:var(--gasto)}
 #tipoSeg button.on[data-v="ingreso"]{color:var(--ingreso)}
+#tipoSeg button.on[data-v="prestamo"]{color:var(--warn)}
 
 .lbl{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:22px 2px 10px}
 .intro{text-align:center;font-size:13.5px;color:var(--muted);margin-top:12px}
@@ -192,9 +197,9 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .sheet .mp{color:var(--muted);margin-top:6px;font-size:14px}
 .sheet .mp b{color:var(--ink)}
 .sheet .mbig{font-size:34px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:12px}
-.sheet .inp{position:relative}
-.sheet .inp input{padding-right:34px;font-variant-numeric:tabular-nums;font-weight:700}
-.sheet .inp i{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted)}
+.inp{position:relative}
+.inp input{padding-right:34px;font-variant-numeric:tabular-nums;font-weight:700}
+.inp i{position:absolute;right:13px;top:50%;transform:translateY(-50%);font-style:normal;color:var(--muted)}
 .sheet .mbtns{display:flex;flex-direction:column;gap:8px;margin-top:18px}
 .sheet .mbtns .primary{padding:15px}
 .sheet .mbtns .ghost{padding:13px}
@@ -238,6 +243,31 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .icos button{width:40px;height:40px;border-radius:12px;background:var(--surface-2);font-size:19px;border:1.5px solid transparent}
 .icos button.on{border-color:var(--accent);background:var(--accent-soft)}
 #presSeg{margin-bottom:10px}
+/* Préstamos */
+.prrow{display:grid;grid-template-columns:minmax(0,1fr) 112px 36px;gap:6px;margin-top:8px;align-items:center}
+.prx{height:44px;border-radius:10px;background:var(--surface-2);color:var(--muted);font-size:20px;font-weight:700}
+.prhint{font-size:13px;margin-top:10px;color:var(--muted)}
+.prhint b{color:var(--ink)}
+.prhint .bad{color:var(--gasto);font-weight:700}
+.drow{padding:12px 0;border-top:1px solid var(--line)}
+.drow:first-of-type{border-top:0}
+.drow .rowx .t{font-size:15px}
+.drow .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.drow .apacts{margin-top:8px}
+/* Tickets y supermercados */
+.supers{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.supers button{padding:8px 12px;border-radius:99px;background:var(--surface-2);font-weight:700;font-size:13.5px;border:1.5px solid transparent}
+.supers button.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.pchip{padding:5px 10px;border-radius:99px;background:var(--surface-2);font-size:12.5px;font-weight:700}
+.fotobtn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:var(--r-sm);border:1.5px dashed var(--line);font-weight:700;color:var(--accent);cursor:pointer;margin-top:4px;background:var(--surface)}
+.fotoprev{display:block;width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-top:8px;background:var(--surface-2)}
+.cexp{padding:0 14px 14px}
+.cexp .pchips{margin-bottom:10px}
+.tthumb{display:block;width:96px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:var(--surface-2)}
+.ticketimg{display:block;width:100%;height:auto;border-radius:12px;margin-top:10px}
+.histhead{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px}
+.histhead .lbl{margin:0}
 /* Compra */
 .addrow{display:flex;gap:8px;position:sticky;top:calc(74px + env(safe-area-inset-top));z-index:12;background:var(--bg);padding:2px 0 8px}
 .addrow .field{flex:1}
@@ -255,7 +285,7 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .cq{font-size:13px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:99px}
 .cnota{flex-basis:100%;font-size:12.5px;color:var(--muted)}
 .ci.done .cn{text-decoration:line-through;color:var(--muted)}
-.who{width:24px;height:24px;flex:none;border-radius:50%;background:var(--surface-2);color:var(--muted);font-size:11.5px;font-weight:800;display:grid;place-items:center}
+.cwho{width:24px;height:24px;flex:none;border-radius:50%;background:var(--surface-2);color:var(--muted);font-size:11.5px;font-weight:800;display:grid;place-items:center}
 
 @media (max-width:360px){ .cats{grid-template-columns:repeat(3,1fr)} }
 </style>
@@ -263,17 +293,17 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 <body>
 <div id="app">
   <header class="top">
-    <div>
-      <div class="eyebrow" id="hogarName">Finanzas</div>
+    <div class="eyebrow" id="hogarName">Finanzas</div>
+    <div class="toprow">
       <h1 id="viewTitle">Nuevo movimiento</h1>
-    </div>
-    <div class="who" id="who" hidden>
-      <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
-      <div class="menu" id="menu" hidden>
-        <div class="em" id="menuEmail"></div>
-        <button id="menuIngresos">Sueldos anuales</button>
-        <a href="reporting.html">Ver informe</a>
-        <button id="logout">Cerrar sesión</button>
+      <div class="who" id="who" hidden>
+        <button class="avatar" id="avatar" aria-label="Cuenta">·</button>
+        <div class="menu" id="menu" hidden>
+          <div class="em" id="menuEmail"></div>
+          <a class="menucta" href="reporting.html">📊 Ver informe</a>
+          <button id="menuIngresos">Sueldos anuales</button>
+          <button id="logout">Cerrar sesión</button>
+        </div>
       </div>
     </div>
   </header>
@@ -312,6 +342,7 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     <div class="seg" id="tipoSeg">
       <button data-v="gasto" class="on">Gasto</button>
       <button data-v="ingreso">Ingreso</button>
+      <button data-v="prestamo">Préstamo</button>
     </div>
 
     <label class="amount">
@@ -325,10 +356,27 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
       <input class="pill" type="date" id="fecha" aria-label="Fecha">
     </div>
 
-    <div class="lbl">Categoría</div>
+    <div class="lbl" id="catsLbl">Categoría</div>
     <div class="cats" id="cats"></div>
 
     <input class="field mt" id="desc" placeholder="Descripción (opcional)" autocomplete="off" maxlength="140">
+
+    <div class="card mt" id="prestBox" hidden>
+      <span class="t">¿Quién te lo tiene que devolver?</span>
+      <p class="hint" style="margin-top:4px">Lo que te devuelvan no cuenta como gasto ni como ingreso.</p>
+      <div id="prPersonas"></div>
+      <div class="presets">
+        <button id="prAdd">+ Persona</button>
+        <button id="prIgual">Repartir a partes iguales</button>
+      </div>
+      <label class="tgl"><span>Una parte es mía<small>Esa parte sí cuenta como gasto tuyo</small></span><span class="switch"><input type="checkbox" id="prMia"><i></i></span></label>
+      <div id="prMiaBox" hidden>
+        <label class="fl" for="prMiImp">Tu parte</label>
+        <div class="inp"><input class="field" id="prMiImp" inputmode="decimal" placeholder="0,00"><i>€</i></div>
+      </div>
+      <div class="prhint" id="prHint"></div>
+      <datalist id="prNombres"></datalist>
+    </div>
 
     <div class="lbl" id="cuentaLbl">¿Desde qué cuenta?</div>
     <div class="seg" id="cuentaSeg"></div>
@@ -406,7 +454,7 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     <div class="chips" id="cFreq"></div>
     <div id="cList"></div>
     <div id="cCarro"></div>
-    <div class="lbl" id="cHistLbl" hidden>Últimas compras</div>
+    <div class="histhead"><div class="lbl">Últimas compras</div><button class="addbtn" id="cNueva">+ Apuntar compra</button></div>
     <div id="cHist"></div>
   </section>
 
@@ -439,6 +487,7 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     </div>
     <div class="stats" id="stats"></div>
     <div class="balance" id="balance" hidden></div>
+    <div class="balance" id="prestCard" hidden></div>
     <div class="scope" id="scope"></div>
     <div id="lista"></div>
   </section>
@@ -619,6 +668,37 @@ function demoApi() {
   ].map(([nombre, cantidad, seccion, anadido_por, estado], i) => ({ id: 'ci' + i, nombre, cantidad, seccion, anadido_por, estado, nota: i === 0 ? 'Sin lactosa' : null, created_at: now() }));
   let compras = [{ id: 'cp1', fecha: addDays(t, -6), tienda: 'Mercadona', importe: 58.3, n_productos: 14, miembro_id: 'm1', created_at: now() }];
   const freqDemo = [['Huevos', 'lacteos'], ['Café', 'despensa'], ['Aceite de oliva', 'despensa'], ['Papel higiénico', 'higiene'], ['Leche', 'lacteos'], ['Cebollas', 'fruta'], ['Pasta', 'despensa']].map(([nombre, seccion]) => ({ nombre, seccion }));
+  const ticketDemo = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="380" height="560" viewBox="0 0 380 560"><rect width="380" height="560" fill="#fbfaf6"/><g font-family="monospace" font-size="15" fill="#222"><text x="190" y="40" text-anchor="middle" font-size="20" font-weight="bold">MERCADONA</text><text x="190" y="62" text-anchor="middle" font-size="12">Ticket de ejemplo</text>${[['LECHE SEMI 6U', '5,34'], ['PAN MOLDE', '1,45'], ['TOMATE 1KG', '2,19'], ['HUEVOS L 12U', '2,85'], ['ACEITE OLIVA 1L', '8,95'], ['DETERGENTE', '6,50'], ['YOGUR NAT 8U', '1,95'], ['PECHUGA POLLO', '5,90'], ['PLATANO', '1,72'], ['CAFE MOLIDO', '3,45']].map(([n, p], i) => `<text x="24" y="${110 + i * 30}">${n}</text><text x="356" y="${110 + i * 30}" text-anchor="end">${p}</text>`).join('')}<line x1="24" y1="420" x2="356" y2="420" stroke="#222" stroke-dasharray="4 4"/><text x="24" y="452" font-weight="bold">TOTAL</text><text x="356" y="452" text-anchor="end" font-weight="bold">40,30</text></g></svg>`);
+  const tickets = { 'h1/demo.jpg': ticketDemo };
+  cItems.push(...['Leche', 'Pan de molde', 'Huevos', 'Aceite de oliva', 'Café', 'Detergente', 'Plátanos'].map((nombre, i) => ({ id: 'cc' + i, nombre, seccion: adivinaSeccion(nombre), estado: 'comprado', compra_id: 'cp1', created_at: now() })));
+  compras[0].ticket_path = 'h1/demo.jpg';
+  let adels = [], deuds = [];
+  const crearAd = (p, por = 'm1') => {
+    const id = nid('ad');
+    adels.push({ id, fecha: p.fecha, descripcion: p.descripcion, total: p.total, mi_parte: p.mi_parte || 0, cuenta_id: p.cuenta });
+    p.deudores.forEach(d => deuds.push({ id: nid('dd'), adelanto_id: id, nombre: d.nombre, importe: d.importe }));
+    const cta = cuentas.find(c => c.id === p.cuenta);
+    movs.push({ id: nid('mv'), hogar_id: 'h1', fecha: p.fecha, tipo: 'adelanto', importe: round2(p.total - (p.mi_parte || 0)), cuenta_id: p.cuenta, descripcion: p.descripcion, pagado_por: cta.titular_id, ambito: 'personal', pct_pagador: 1, origen: 'manual', adelanto_id: id, created_at: now() });
+    if (p.mi_parte > 0) movs.push({ id: nid('mv'), hogar_id: 'h1', fecha: p.fecha, tipo: 'gasto', importe: p.mi_parte, categoria_id: p.categoria, cuenta_id: p.cuenta, descripcion: p.descripcion + ' (mi parte)', pagado_por: cta.titular_id, ambito: 'personal', pct_pagador: 1, origen: 'manual', adelanto_id: id, created_at: now() });
+    return id;
+  };
+  const devolver = (deudorId, importe, cuenta, fecha, nota, auto) => {
+    const d = deuds.find(x => x.id === deudorId), a = adels.find(x => x.id === d.adelanto_id);
+    movs.push({ id: nid('mv'), hogar_id: 'h1', fecha, tipo: 'devolucion', importe, cuenta_id: cuenta || a.cuenta_id, descripcion: (auto ? 'Perdonado: ' : 'Devolución de ') + d.nombre + ' · ' + a.descripcion, notas: nota || null,
+      pagado_por: 'm1', ambito: 'personal', pct_pagador: 1, origen: auto ? 'auto' : 'manual', adelanto_id: a.id, adelanto_deudor_id: d.id, created_at: now() });
+  };
+  const vDeud = () => deuds.map(d => {
+    const a = adels.find(x => x.id === d.adelanto_id), am = movs.find(m => m.adelanto_id === a.id && m.tipo === 'adelanto');
+    if (!am || am.anulado) return null;
+    const ms = movs.filter(m => m.adelanto_deudor_id === d.id && !m.anulado);
+    const dev = ms.filter(m => m.tipo === 'devolucion').reduce((s, m) => s + m.importe, 0);
+    return { ...d, fecha: a.fecha, descripcion: a.descripcion, cuenta_id: a.cuenta_id, total: a.total,
+      cobrado: ms.filter(m => m.tipo === 'devolucion' && m.origen !== 'auto').reduce((s, m) => s + m.importe, 0),
+      perdonado: ms.filter(m => m.tipo === 'gasto').reduce((s, m) => s + m.importe, 0), pendiente: round2(d.importe - dev) };
+  }).filter(Boolean);
+  const merienda = crearAd({ descripcion: 'Merienda en Getxo', total: 48, mi_parte: 12, categoria: catId('Restaurantes'), cuenta: 'a2', fecha: f(1), deudores: [{ nombre: 'Ana', importe: 12 }, { nombre: 'Luis', importe: 12 }, { nombre: 'Marta', importe: 12 }] });
+  crearAd({ descripcion: 'Regalo cumple de Lucía', total: 60, mi_parte: 0, cuenta: 'a2', fecha: f(2), deudores: [{ nombre: 'Mi hermana', importe: 60 }] });
+  devolver(deuds.find(d => d.adelanto_id === merienda && d.nombre === 'Ana').id, 12, 'a2', f(0), 'Bizum');
   let liqs = [{ id: 'l1', fecha: f(0), de_miembro: 'm2', a_miembro: 'm1', importe: 6.5, nota: 'Bizum Netflix', estado: 'pendiente', created_at: now() }];
   return {
     mode: 'demo', onAuth() {}, async signOut() {},
@@ -626,7 +706,11 @@ function demoApi() {
     async listMovs(d, h) { return movs.filter(m => m.fecha >= d && m.fecha < h); },
     async listTrs(d, h) { return trs.filter(x => x.fecha >= d && x.fecha < h); },
     async insertMov(r) { movs.push({ ...r, id: nid('mv'), hogar_id: 'h1', created_at: now() }); },
-    async anularMov(id, motivo) { const m = movs.find(x => x.id === id); if (!m || m.anulado) throw new Error('Ya está anulado'); Object.assign(m, { anulado: true, anulado_at: new Date().toISOString(), motivo_anulacion: motivo || null }); },
+    async anularMov(id, motivo) {
+      const m = movs.find(x => x.id === id); if (!m || m.anulado) throw new Error('Ya está anulado');
+      Object.assign(m, { anulado: true, anulado_at: new Date().toISOString(), motivo_anulacion: motivo || null });
+      if (m.tipo === 'adelanto') movs.filter(x => x.adelanto_id === m.adelanto_id && x.tipo === 'gasto' && !x.adelanto_deudor_id).forEach(x => Object.assign(x, { anulado: true, motivo_anulacion: 'Préstamo anulado' }));
+    },
     async insertTransfer(r) { addTr(r); },
     async anularTrs(id, motivo) {
       const t = trs.find(x => x.id === id); if (!t || t.anulado) throw new Error('Ya está anulada');
@@ -723,13 +807,26 @@ function demoApi() {
     async compras() { return compras.map(c => ({ ...c })).sort((a, b) => b.created_at.localeCompare(a.created_at)); },
     async frecuentes() { return freqDemo; },
     async cerrarCompra(p) {
-      const carro = cItems.filter(i => i.estado === 'en_carro'); if (!carro.length) throw new Error('No hay nada en el carro');
+      const carro = cItems.filter(i => i.estado === 'en_carro'); if (!carro.length && !(p.extra || []).length && !p.importe) throw new Error('No hay nada en el carro');
       if (p.importe) { const cta = cuentas.find(c => c.id === p.cuenta); movs.push({ id: nid('mv'), hogar_id: 'h1', fecha: p.fecha, tipo: 'gasto', importe: p.importe, categoria_id: p.categoria, cuenta_id: p.cuenta, descripcion: p.tienda || 'Compra',
         pagado_por: cta.titular_id, ambito: cta.tipo === 'comun' || p.compartido ? 'compartido' : 'personal', pct_pagador: cta.tipo === 'comun' ? 0.5 : p.compartido ? p.pct : 1, origen: 'manual', created_at: now() }); }
-      const c = { id: nid('cp'), fecha: p.fecha, tienda: p.tienda || null, importe: p.importe, n_productos: carro.length, miembro_id: 'm1', created_at: now() }; compras.push(c);
+      const c = { id: nid('cp'), fecha: p.fecha, tienda: p.tienda || null, importe: p.importe, n_productos: carro.length + (p.extra || []).length, miembro_id: 'm1', ticket_path: p.ticket || null, created_at: now() }; compras.push(c);
       carro.forEach(i => { i.estado = 'comprado'; i.compra_id = c.id; });
+      (p.extra || []).forEach(x => cItems.push({ id: nid('ci'), nombre: x.nombre, seccion: x.seccion, estado: 'comprado', compra_id: c.id, anadido_por: 'm1', created_at: now() }));
     },
     subscribeCompra() {},
+    async compraDetalle(id) { return cItems.filter(i => i.compra_id === id).map(i => ({ nombre: i.nombre, cantidad: i.cantidad, seccion: i.seccion })); },
+    async subirTicket(blob) { const path = 'h1/' + nid('tk') + '.jpg'; tickets[path] = URL.createObjectURL(blob); return path; },
+    async ticketUrl(path) { return tickets[path]; },
+    async adjuntarTicket(id, path) { const c = compras.find(x => x.id === id); if (c.ticket_path) throw new Error('Esta compra ya tiene ticket'); c.ticket_path = path; },
+    async deudores() { return vDeud(); },
+    async crearAdelanto(p) { return crearAd(p); },
+    async registrarDevolucion(id, importe, cuenta, fecha, nota) { const d = vDeud().find(x => x.id === id); if (importe > d.pendiente + 0.004) throw new Error('Te debe como mucho ' + d.pendiente); devolver(id, importe, cuenta, fecha, nota); },
+    async darPorPerdido(id, cat) {
+      const d = vDeud().find(x => x.id === id), a = adels.find(x => x.id === d.adelanto_id);
+      movs.push({ id: nid('mv'), hogar_id: 'h1', fecha: today(), tipo: 'gasto', importe: d.pendiente, categoria_id: cat, cuenta_id: a.cuenta_id, descripcion: 'No devuelto: ' + d.nombre + ' · ' + a.descripcion, pagado_por: 'm1', ambito: 'personal', pct_pagador: 1, origen: 'auto', adelanto_id: a.id, adelanto_deudor_id: id, created_at: now() });
+      devolver(id, d.pendiente, a.cuenta_id, today(), null, true);
+    },
     async balance() {
       const b = calcBalance(movs.filter(m => !m.anulado), miembros);
       liqs.filter(l => l.estado === 'aceptada').forEach(l => { b.find(x => x.miembro_id === l.de_miembro).saldo += l.importe; b.find(x => x.miembro_id === l.a_miembro).saldo -= l.importe; });
@@ -821,8 +918,28 @@ function supaApi() {
     },
     async cerrarCompra(p) {
       return ok(await sb.rpc('cerrar_compra', { p_importe: p.importe, p_cuenta: p.cuenta, p_tienda: p.tienda || null, p_fecha: p.fecha,
-        p_categoria: p.categoria, p_compartido: p.compartido, p_pct: p.pct }));
+        p_categoria: p.categoria, p_compartido: p.compartido, p_pct: p.pct, p_extra: p.extra?.length ? p.extra : null, p_ticket: p.ticket || null }));
     },
+    async compraDetalle(id) { return ok(await sb.from('compra_items').select('nombre,cantidad,seccion').eq('compra_id', id).order('nombre')); },
+    async subirTicket(blob) {
+      const path = `${hogarId}/${crypto.randomUUID()}.jpg`;
+      const { error } = await sb.storage.from('tickets').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      if (error) throw new Error('No se pudo subir el ticket: ' + error.message);
+      return path;
+    },
+    async ticketUrl(path) {
+      const { data, error } = await sb.storage.from('tickets').createSignedUrl(path, 3600);
+      if (error) throw new Error(error.message);
+      return data.signedUrl;
+    },
+    async adjuntarTicket(id, path) { ok(await sb.rpc('adjuntar_ticket', { p_compra: id, p_path: path })); },
+    async deudores() { return ok(await sb.from('v_adelanto_deudores').select('*').eq('hogar_id', hogarId).order('fecha', { ascending: false })); },
+    async crearAdelanto(p) {
+      return ok(await sb.rpc('crear_adelanto', { p_descripcion: p.descripcion, p_total: p.total, p_cuenta: p.cuenta, p_deudores: p.deudores,
+        p_mi_parte: p.mi_parte || 0, p_categoria: p.categoria, p_fecha: p.fecha }));
+    },
+    async registrarDevolucion(id, importe, cuenta, fecha, nota) { ok(await sb.rpc('registrar_devolucion', { p_deudor: id, p_importe: importe, p_cuenta: cuenta || null, p_fecha: fecha, p_nota: nota || null })); },
+    async darPorPerdido(id, cat) { ok(await sb.rpc('dar_por_perdido', { p_deudor: id, p_categoria: cat })); },
     subscribeCompra(cb) {
       sb.channel('compra-' + hogarId)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'compra_items', filter: `hogar_id=eq.${hogarId}` }, cb)
@@ -857,7 +974,8 @@ const state = {
   mes: monthStart(today()), movs: [], trs: [], bal: [], openId: null,
   aps: [], ingresos: {}, dismissed: new Set(), loginEmail: '', listView: lsGet('fin_list') === 'comun' ? 'comun' : 'mia', afterIng: null,
   liqs: [], recs: [], recPend: [], autos: [], pres: [], objs: [], objAportes: [], planMovs: [], presScope: lsGet('fin_pres') === 'personal' ? 'personal' : 'comun',
-  cItems: [], cHist: [], cFreq: [],
+  cItems: [], cHist: [], cFreq: [], cOpen: null, cDet: {}, tUrls: {},
+  pr: { personas: [{ nombre: '', importe: '' }], mia: false, miImp: '' }, deud: [],
 };
 const TITLES = { add: 'Nuevo movimiento', compra: 'Lista de la compra', aportar: 'Aportar a la común', plan: 'Planificar', list: 'Movimientos' };
 
@@ -963,6 +1081,7 @@ async function start() {
   renderAdd(); renderAp();
   go('add');
   try { api.subscribeCompra(onCompraCambio); } catch {}
+  api.deudores().then(d => { state.deud = d.map(x => ({ ...x, importe: +x.importe, pendiente: +x.pendiente, cobrado: +x.cobrado })); }).catch(() => {});
   await generarAutomaticos();
   await refreshAll();
   maybePopup();
@@ -1000,16 +1119,28 @@ function cleanAmount(el) { el.value = el.value.replace(/[^\d.,]/g, '').replace(/
 /* ===================== Vista AÑADIR ===================== */
 function renderAdd() {
   $$('#tipoSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === state.tipo));
+  const pres = state.tipo === 'prestamo';
+  $('#prestBox').hidden = !pres;
+  // En préstamos: primero qué es y quién debe, después la categoría de tu parte
+  if (pres) { $('#catsLbl').before($('#desc')); $('#catsLbl').before($('#prestBox')); }
+  else { $('#cats').after($('#prestBox')); $('#cats').after($('#desc')); }
+  $('#desc').placeholder = pres ? '¿Qué es? (merienda, regalo de cumple…)' : 'Descripción (opcional)';
+  if (!pres && state.cuenta && !visibles().some(c => c.id === state.cuenta)) state.cuenta = misCuentas()[0]?.id || comun()?.id;
   renderCats(); renderCuentaSeg(); syncDates('#dates', '#fecha', state.fecha); syncShare(); updateSave(); sizeAmount($('#importe'));
+  if (pres) renderPrest();
 }
+const tipoCats = () => state.tipo === 'prestamo' ? 'gasto' : state.tipo;
 function renderCats() {
-  $('#cats').innerHTML = state.cat.categorias.filter(c => c.tipo === state.tipo).map(c => `
+  const pres = state.tipo === 'prestamo', ocultar = pres && !state.pr.mia;
+  $('#catsLbl').textContent = pres ? 'Categoría de tu parte' : 'Categoría';
+  $('#catsLbl').hidden = ocultar; $('#cats').hidden = ocultar;
+  $('#cats').innerHTML = state.cat.categorias.filter(c => c.tipo === tipoCats()).map(c => `
     <button class="cat ${c.id === state.categoria ? 'on' : ''}" data-id="${c.id}" style="--c:${esc(c.color || '#888')}">
       <span class="ic">${esc(c.icono || '•')}</span>${esc(c.nombre)}
     </button>`).join('');
 }
 function renderCuentaSeg() {
-  $('#cuentaLbl').textContent = state.tipo === 'gasto' ? '¿Desde qué cuenta?' : '¿A qué cuenta?';
+  $('#cuentaLbl').textContent = state.tipo === 'ingreso' ? '¿A qué cuenta?' : '¿Desde qué cuenta?';
   $('#cuentaSeg').innerHTML = visibles().map(c =>
     `<button data-id="${c.id}" class="${c.id === state.cuenta ? 'on' : ''}">${esc(nombreCuenta(c))}</button>`).join('');
 }
@@ -1042,9 +1173,85 @@ function syncShare() {
 }
 function updateSave() {
   const imp = amountOf($('#importe'));
-  $('#guardar').textContent = `Guardar ${state.tipo}${imp ? ' · ' + money(imp) : ''}`;
+  $('#guardar').textContent = `Guardar ${state.tipo === 'prestamo' ? 'préstamo' : state.tipo}${imp ? ' · ' + money(imp) : ''}`;
 }
+
+/* ---------- Préstamos: pagas tú y te lo devuelven ---------- */
+function renderPrest() {
+  const pr = state.pr;
+  $('#prPersonas').innerHTML = pr.personas.map((p, i) => `<div class="prrow">
+      <input class="field" data-pn="${i}" placeholder="Nombre" list="prNombres" value="${esc(p.nombre)}" maxlength="40" autocomplete="off">
+      <div class="inp"><input class="field" data-pi="${i}" inputmode="decimal" placeholder="0,00" value="${esc(p.importe)}"><i>€</i></div>
+      <button class="prx" data-px="${i}" aria-label="Quitar">×</button></div>`).join('');
+  $('#prMia').checked = pr.mia;
+  $('#prMiaBox').hidden = !pr.mia;
+  $('#prMiImp').value = pr.miImp;
+  $('#prNombres').innerHTML = [...new Set(state.deud.map(d => d.nombre))].map(n => `<option value="${esc(n)}">`).join('');
+  prestHint();
+}
+function prestCalc() {
+  const total = amountOf($('#importe'));
+  const debe = state.pr.personas.reduce((s, p) => s + (amountOf({ value: p.importe }) || 0), 0);
+  const mia = state.pr.mia ? (amountOf({ value: state.pr.miImp }) || 0) : 0;
+  return { total, debe: round2(debe), mia: round2(mia), dif: round2(total - debe - mia) };
+}
+function prestHint() {
+  const c = prestCalc();
+  if (!c.total) { $('#prHint').innerHTML = 'Escribe arriba el total que has pagado.'; return; }
+  const base = `Te deben <b>${money(c.debe)}</b>${state.pr.mia ? ` · tu parte <b>${money(c.mia)}</b>` : ''}`;
+  $('#prHint').innerHTML = Math.abs(c.dif) < 0.01 ? base + ' ✓'
+    : `${base} · <span class="bad">${c.dif > 0 ? `faltan ${money(c.dif)} por repartir` : `sobran ${money(-c.dif)}`}</span>`;
+}
+function prestIgual() {
+  const total = amountOf($('#importe'));
+  if (!total) return toast('Escribe primero el total', 'err');
+  const n = state.pr.personas.length + (state.pr.mia ? 1 : 0);
+  const parte = Math.floor(total / n * 100) / 100;
+  state.pr.personas.forEach(p => p.importe = fmtInput(parte));
+  const resto = round2(total - parte * n);
+  if (state.pr.mia) state.pr.miImp = fmtInput(round2(parte + resto));
+  else state.pr.personas[state.pr.personas.length - 1].importe = fmtInput(round2(parte + resto));
+  renderPrest();
+}
+async function savePrestamo() {
+  const c = prestCalc(), desc = $('#desc').value.trim();
+  if (!c.total) { toast('Escribe el total', 'err'); $('#importe').focus(); return; }
+  if (!desc) { toast('Escribe qué es (merienda, regalo…)', 'err'); $('#desc').focus(); return; }
+  const deudores = state.pr.personas.map(p => ({ nombre: p.nombre.trim(), importe: round2(amountOf({ value: p.importe }) || 0) })).filter(p => p.nombre || p.importe);
+  if (!deudores.length || deudores.some(p => !p.nombre || !p.importe)) return toast('Pon nombre e importe a cada persona', 'err');
+  if (Math.abs(c.dif) >= 0.01) return toast(c.dif > 0 ? `Faltan ${money(c.dif)} por repartir` : `Sobran ${money(-c.dif)}`, 'err');
+  if (c.mia > 0 && !state.categoria) return toast('Elige la categoría de tu parte', 'err');
+  if (!state.cuenta) return toast('Elige una cuenta', 'err');
+  const btn = $('#guardar'); btn.disabled = true;
+  try {
+    await api.crearAdelanto({ descripcion: desc, total: round2(c.total), cuenta: state.cuenta, deudores, mi_parte: c.mia, categoria: c.mia > 0 ? state.categoria : null, fecha: state.fecha });
+    toast(`Préstamo guardado · te deben ${money(c.debe)}`);
+    $('#importe').value = ''; $('#desc').value = '';
+    state.categoria = null; state.pr = { personas: [{ nombre: '', importe: '' }], mia: false, miImp: '' };
+    try { state.deud = await api.deudores(); } catch {}
+    renderAdd();
+  } catch (e) { toast(e.message, 'err'); }
+  finally { btn.disabled = false; }
+}
+function bindPrest() {
+  $('#prestBox').addEventListener('input', e => {
+    const t = e.target;
+    if (t.dataset.pn != null) state.pr.personas[+t.dataset.pn].nombre = t.value;
+    if (t.dataset.pi != null) { t.value = t.value.replace(/[^\d.,]/g, ''); state.pr.personas[+t.dataset.pi].importe = t.value; }
+    if (t.id === 'prMiImp') { t.value = t.value.replace(/[^\d.,]/g, ''); state.pr.miImp = t.value; }
+    prestHint();
+  });
+  $('#prestBox').addEventListener('click', e => {
+    const x = e.target.closest('[data-px]');
+    if (x) { state.pr.personas.splice(+x.dataset.px, 1); if (!state.pr.personas.length) state.pr.personas.push({ nombre: '', importe: '' }); renderPrest(); }
+    if (e.target.id === 'prAdd') { state.pr.personas.push({ nombre: '', importe: '' }); renderPrest(); $$('#prPersonas [data-pn]').at(-1)?.focus(); }
+    if (e.target.id === 'prIgual') prestIgual();
+  });
+  $('#prMia').addEventListener('change', e => { state.pr.mia = e.target.checked; if (!state.pr.mia) state.pr.miImp = ''; renderPrest(); renderCats(); });
+}
+
 async function save() {
+  if (state.tipo === 'prestamo') return savePrestamo();
   const imp = amountOf($('#importe'));
   if (!imp) { toast('Escribe un importe', 'err'); $('#importe').focus(); return; }
   if (!state.categoria) { toast('Elige una categoría', 'err'); return; }
@@ -1075,7 +1282,7 @@ function bindAdd() {
     const b = e.target.closest('button'); if (!b) return;
     state.tipo = b.dataset.v; state.categoria = null; renderAdd();
   });
-  $('#importe').addEventListener('input', e => { cleanAmount(e.target); updateSave(); syncShare(); });
+  $('#importe').addEventListener('input', e => { cleanAmount(e.target); updateSave(); syncShare(); if (state.tipo === 'prestamo') prestHint(); });
   bindDates('#dates', '#fecha', v => { state.fecha = v; syncDates('#dates', '#fecha', v); });
   $('#cats').addEventListener('click', e => { const b = e.target.closest('.cat'); if (!b) return; state.categoria = b.dataset.id; renderCats(); });
   $('#cuentaSeg').addEventListener('click', e => {
@@ -1390,7 +1597,9 @@ function openAnular(key) {
   if (!x) return;
   state.modalCtx = { kind: 'anular', k, id };
   const extra = k === 't' && x.aportacion_id ? ' Si era tu parte de una aportación, volverá a quedar pendiente.'
-    : k === 't' && x.liquidacion_id ? ' Si era un pago de deuda, la deuda volverá a contar.' : '';
+    : k === 't' && x.liquidacion_id ? ' Si era un pago de deuda, la deuda volverá a contar.'
+    : x.tipo === 'adelanto' ? ' Al anular un préstamo también se anula tu parte y deja de estar pendiente de cobro.'
+    : x.tipo === 'devolucion' ? ' Lo devuelto volverá a quedar pendiente.' : '';
   openModal(`
     <div class="mh">Anular ${k === 't' ? 'transferencia' : 'movimiento'}</div>
     <p class="mp">No se borra: queda en el historial tachado, con quién lo anuló, cuándo y por qué, y deja de contar en saldos e informes.${extra}</p>
@@ -1818,7 +2027,7 @@ function renderCompra() {
   const enLista = new Set(state.cItems.map(i => normTxt(i.nombre)));
   const freq = state.cFreq.filter(f => !enLista.has(normTxt(f.nombre))).slice(0, 10);
   $('#cFreq').innerHTML = freq.length ? freq.map(f => `<button class="chip" data-freq="${esc(f.nombre)}" data-sec="${esc(f.seccion)}">+ ${esc(f.nombre)}</button>`).join('') : '';
-  const ini = id => { const m = miembro(id); return m && m.id !== me().id ? `<span class="who" title="Añadido por ${esc(m.nombre)}">${esc(m.nombre.charAt(0))}</span>` : ''; };
+  const ini = id => { const m = miembro(id); return m && m.id !== me().id ? `<span class="cwho" title="Añadido por ${esc(m.nombre)}">${esc(m.nombre.charAt(0))}</span>` : ''; };
   const row = (i, enCarro) => `<div class="ci ${enCarro ? 'done' : ''}">
       <button class="chk" data-chk="${i.id}" aria-label="${enCarro ? 'Sacar del carro' : 'Al carro'}">${enCarro ? '✓' : ''}</button>
       <button class="cmain" data-cedit="${i.id}"><span class="cn">${esc(i.nombre)}</span>${i.cantidad ? `<span class="cq">${esc(i.cantidad)}</span>` : ''}${i.nota ? `<span class="cnota">${esc(i.nota)}</span>` : ''}</button>
@@ -1834,11 +2043,17 @@ function renderCompra() {
       + (!pend.length ? `<div class="empty" style="padding:18px">¡Todo en el carro! 🎉</div>` : '');
   }
   $('#cCarro').innerHTML = carro.length ? `<div class="sec">En el carro · ${carro.length}</div><div class="items">${carro.map(i => row(i, true)).join('')}</div>` : '';
-  $('#cHistLbl').hidden = !state.cHist.length;
-  $('#cHist').innerHTML = state.cHist.length ? `<div class="items">${state.cHist.slice(0, 5).map(c => `<div class="iw"><div class="item">
-      <span class="ic" style="--c:#16A34A">🧾</span>
-      <span class="main"><span class="t">${esc(c.tienda || 'Compra')}</span><span class="s">${esc(fechaCorta(c.fecha))} · ${c.n_productos} producto${c.n_productos === 1 ? '' : 's'}${c.miembro_id ? ' · ' + esc(nombreCorto(miembro(c.miembro_id))) : ''}</span></span>
-      <span class="amt">${c.importe ? money(+c.importe) : '<span class="badge gray">Sin gasto</span>'}</span></div></div>`).join('')}</div>` : '';
+  $('#cHist').innerHTML = state.cHist.length ? `<div class="items">${state.cHist.slice(0, 10).map(c => {
+    const open = state.cOpen === c.id, det = state.cDet[c.id];
+    return `<div class="iw"><button class="item" data-comp="${c.id}">
+      <span class="ic" style="--c:#16A34A">${c.ticket_path ? '🧾' : '🛒'}</span>
+      <span class="main"><span class="t">${esc(c.tienda || 'Compra')}</span><span class="s">${esc(fechaCorta(c.fecha))} · ${c.n_productos} producto${c.n_productos === 1 ? '' : 's'}${c.miembro_id ? ' · ' + esc(nombreCorto(miembro(c.miembro_id))) : ''}${c.ticket_path ? ' · con ticket' : ''}</span></span>
+      <span class="amt">${c.importe ? money(+c.importe) : '<span class="badge gray">Sin gasto</span>'}</span></button>
+      ${open ? `<div class="cexp">
+        ${det ? (det.length ? `<div class="pchips">${det.map(i => `<span class="pchip">${esc(SEC[i.seccion]?.ic || '🛒')} ${esc(i.nombre)}${i.cantidad ? ' · ' + esc(i.cantidad) : ''}</span>`).join('')}</div>` : '<p class="hint">Sin productos apuntados.</p>') : '<p class="hint">Cargando…</p>'}
+        ${c.ticket_path ? (state.tUrls[c.ticket_path] ? `<button data-tver="${c.id}"><img class="tthumb" src="${esc(state.tUrls[c.ticket_path])}" alt="Ticket"></button>` : '<p class="hint">Cargando ticket…</p>')
+          : `<label class="fotobtn">📷 Añadir foto del ticket<input type="file" accept="image/*" data-tadd="${c.id}" hidden></label>`}
+      </div>` : ''}</div>`; }).join('')}</div>` : '<div class="hintcard">Aquí verás cada compra con su tienda, lo que comprasteis y la foto del ticket.</div>';
   $('#compraBtn').textContent = `Terminar compra · ${carro.length} producto${carro.length === 1 ? '' : 's'}`;
   $('#compraBar').hidden = state.tab !== 'compra' || !carro.length;
   if (state.tab === 'compra') document.body.dataset.bar = carro.length ? '1' : '0';
@@ -1875,20 +2090,28 @@ function openItemForm(i) {
       <button class="ghost" data-m="close">Cancelar</button>
     </div>`);
 }
+const SUPERS = ['Mercadona', 'Eroski', 'Lidl', 'Carrefour', 'Dia', 'BM', 'Lupa', 'Alcampo', 'Aldi'];
 function openTerminarCompra() {
   const carro = state.cItems.filter(i => i.estado === 'en_carro'), c = comun();
-  const ultima = state.cHist.find(h => h.tienda)?.tienda || '';
-  const tiendas = [...new Set(state.cHist.map(h => h.tienda).filter(Boolean))];
-  state.modalCtx = { kind: 'terminar', cuenta: c?.id || misCuentas()[0]?.id };
+  const usadas = [...new Set(state.cHist.map(h => h.tienda).filter(Boolean))];
+  const lista = [...new Set([...usadas, ...SUPERS])].slice(0, 10);
+  state.modalCtx = { kind: 'terminar', cuenta: c?.id || misCuentas()[0]?.id, tienda: usadas[0] || '', blob: null };
   openModal(`
-    <div class="mh">Terminar compra</div>
-    <p class="mp">${carro.length} producto${carro.length === 1 ? '' : 's'} del carro pasan al historial. Lo que no hayas cogido se queda en la lista.</p>
+    <div class="mh">${carro.length ? 'Terminar compra' : 'Apuntar compra'}</div>
+    <p class="mp">${carro.length ? `${carro.length} producto${carro.length === 1 ? '' : 's'} del carro pasan al historial. Lo que no hayas cogido se queda en la lista.` : 'No hay nada en el carro: apunta aquí lo que has comprado.'}</p>
+    <label class="fl">¿Dónde?</label>
+    <div class="supers" id="fSupers">${lista.map(t => `<button data-t="${esc(t)}" class="${t === state.modalCtx.tienda ? 'on' : ''}">${esc(t)}</button>`).join('')}<button data-t="">Otro…</button></div>
+    <input class="field mt" id="fTienda" placeholder="Nombre de la tienda" maxlength="40" value="${esc(state.modalCtx.tienda)}" ${lista.includes(state.modalCtx.tienda) || !state.modalCtx.tienda ? 'hidden' : ''}>
+    <label class="fl">Productos</label>
+    ${carro.length ? `<div class="pchips">${carro.map(i => `<span class="pchip">${esc(SEC[i.seccion]?.ic || '🛒')} ${esc(i.nombre)}${i.cantidad ? ' · ' + esc(i.cantidad) : ''}</span>`).join('')}</div>` : ''}
+    <input class="field mt" id="fExtra" placeholder="${carro.length ? '¿Algo más que no estaba en la lista? (separado por comas)' : 'Qué has comprado (separado por comas)'}" maxlength="400">
+    <label class="fl">Foto del ticket</label>
+    <label class="fotobtn" id="fFotoBtn">📷 Hacer o elegir foto<input type="file" accept="image/*" id="fFoto" hidden></label>
+    <img class="fotoprev" id="fFotoPrev" alt="Ticket" hidden>
     ${tgl('fGasto', 'Apuntar el gasto', true, 'Se crea un gasto de Súper con lo que has pagado')}
     <div id="fGastoBox">
-      <div class="row2">
-        <div><label class="fl" for="fImp">Total pagado</label><div class="inp"><input class="field" id="fImp" inputmode="decimal" placeholder="0,00"><i>€</i></div></div>
-        <div><label class="fl" for="fTienda">Tienda</label><input class="field" id="fTienda" list="fTiendas" value="${esc(ultima)}" placeholder="Mercadona…" maxlength="40"><datalist id="fTiendas">${tiendas.map(t => `<option value="${esc(t)}">`).join('')}</datalist></div>
-      </div>
+      <label class="fl" for="fImp">Total pagado</label>
+      <div class="inp"><input class="field" id="fImp" inputmode="decimal" placeholder="0,00"><i>€</i></div>
       <label class="fl">Pagado con</label>
       <div class="seg" id="fCta">${visibles().map(x => `<button data-id="${x.id}" class="${x.id === state.modalCtx.cuenta ? 'on' : ''}">${esc(nombreCuenta(x))}</button>`).join('')}</div>
       <div id="fCompBox">${tgl('fComp', 'Es compra de los dos', true, ingresosOk() ? `Se reparte según ingresos (${pctTxt(shareIngresos(me().id))} tú)` : 'Se reparte 50/50')}</div>
@@ -1906,6 +2129,24 @@ function openTerminarCompra() {
   };
   $('#fGasto').addEventListener('change', sync);
   $('#fImp').addEventListener('input', e => { e.target.value = e.target.value.replace(/[^\d.,]/g, ''); sync(); });
+  $('#fSupers').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    $$('#fSupers button').forEach(x => x.classList.toggle('on', x === b));
+    state.modalCtx.tienda = b.dataset.t;
+    $('#fTienda').hidden = !!b.dataset.t; $('#fTienda').value = b.dataset.t;
+    if (!b.dataset.t) $('#fTienda').focus();
+  });
+  $('#fTienda').addEventListener('input', e => state.modalCtx.tienda = e.target.value);
+  $('#fFoto').addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const blob = await comprimirImagen(f);
+      state.modalCtx.blob = blob;
+      const prev = $('#fFotoPrev'); if (prev.src) URL.revokeObjectURL(prev.src);
+      prev.src = URL.createObjectURL(blob); prev.hidden = false;
+      $('#fFotoBtn').firstChild.textContent = '📷 Cambiar foto';
+    } catch (err) { toast(err.message, 'err'); }
+  });
   $('#fCta').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.modalCtx.cuenta = b.dataset.id; $$('#fCta button').forEach(x => x.classList.toggle('on', x === b)); sync(); });
   sync();
   setTimeout(() => $('#fImp').focus(), 80);
@@ -1925,13 +2166,19 @@ Object.assign(MODAL, {
     const g = $('#fGasto').checked, imp = g ? amountOf($('#fImp')) : 0;
     if (g && !imp) return toast('Escribe lo que has pagado o desactiva "Apuntar el gasto"', 'err');
     const comp = !esComun(ctx.cuenta) && $('#fComp').checked;
+    const extra = $('#fExtra').value.split(/[,\n;]+/).map(x => x.trim()).filter(Boolean).map(x => { const p = parseItem(x); return { nombre: p.nombre, seccion: adivinaSeccion(p.nombre) }; });
+    const nCarro = state.cItems.filter(i => i.estado === 'en_carro').length;
+    if (!nCarro && !extra.length && !(g && imp)) return toast('Apunta qué has comprado o el total', 'err');
     b.disabled = true;
     try {
-      await api.cerrarCompra({ importe: g ? round2(imp) : null, cuenta: ctx.cuenta, tienda: $('#fTienda').value.trim(), fecha: $('#mFecha').value || today(),
-        categoria: state.cat.categorias.find(c => c.nombre === 'Súper')?.id || null, compartido: comp, pct: comp ? round2((ingresosOk() ? shareIngresos(me().id) : 0.5) * 10000) / 10000 : null });
+      let ticket = null;
+      if (ctx.blob) { b.textContent = 'Subiendo ticket…'; ticket = await api.subirTicket(ctx.blob); }
+      await api.cerrarCompra({ importe: g ? round2(imp) : null, cuenta: ctx.cuenta, tienda: (ctx.tienda || $('#fTienda').value).trim(), fecha: $('#mFecha').value || today(),
+        categoria: state.cat.categorias.find(c => c.nombre === 'Súper')?.id || null, compartido: comp, pct: comp ? round2((ingresosOk() ? shareIngresos(me().id) : 0.5) * 10000) / 10000 : null,
+        extra, ticket });
       closeModal(); toast(g ? `Compra terminada · ${money(imp)} en Súper` : 'Compra terminada');
       await loadCompra();
-    } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+    } catch (e) { toast(e.message, 'err'); b.disabled = false; b.textContent = 'Terminar compra'; }
   },
 });
 function bindCompra() {
@@ -1945,6 +2192,53 @@ function bindCompra() {
     if (ed) { const i = state.cItems.find(x => x.id === ed.dataset.cedit); if (i && !String(i.id).startsWith('tmp')) openItemForm(i); }
   });
   $('#compraBtn').addEventListener('click', openTerminarCompra);
+  $('#cNueva').addEventListener('click', openTerminarCompra);
+  $('#cHist').addEventListener('click', async e => {
+    const ver = e.target.closest('[data-tver]');
+    if (ver) { const c = state.cHist.find(x => x.id === ver.dataset.tver); return openTicket(c); }
+    if (e.target.closest('.fotobtn')) return;
+    const b = e.target.closest('[data-comp]'); if (!b) return;
+    const id = b.dataset.comp;
+    state.cOpen = state.cOpen === id ? null : id; renderCompra();
+    if (state.cOpen !== id) return;
+    const c = state.cHist.find(x => x.id === id);
+    try {
+      if (!state.cDet[id]) state.cDet[id] = await api.compraDetalle(id);
+      if (c.ticket_path && !state.tUrls[c.ticket_path]) state.tUrls[c.ticket_path] = await api.ticketUrl(c.ticket_path);
+    } catch (err) { toast(err.message, 'err'); }
+    renderCompra();
+  });
+  $('#cHist').addEventListener('change', async e => {
+    const inp = e.target.closest('[data-tadd]'); if (!inp || !inp.files[0]) return;
+    const id = inp.dataset.tadd;
+    try {
+      toast('Subiendo ticket…');
+      const blob = await comprimirImagen(inp.files[0]);
+      const path = await api.subirTicket(blob);
+      await api.adjuntarTicket(id, path);
+      const c = state.cHist.find(x => x.id === id); c.ticket_path = path;
+      state.tUrls[path] = await api.ticketUrl(path);
+      toast('Ticket guardado'); renderCompra();
+    } catch (err) { toast(err.message, 'err'); }
+  });
+}
+function openTicket(c) {
+  state.modalCtx = { kind: 'ticket' };
+  openModal(`<div class="mh">${esc(c.tienda || 'Compra')} · ${esc(fechaCorta(c.fecha))}</div>
+    <p class="mp">${c.importe ? money(+c.importe) + ' · ' : ''}${c.n_productos} producto${c.n_productos === 1 ? '' : 's'}</p>
+    <img class="ticketimg" src="${esc(state.tUrls[c.ticket_path] || '')}" alt="Ticket de la compra">
+    <div class="mbtns"><button class="ghost" data-m="close">Cerrar</button></div>`);
+}
+/* Reduce la foto antes de subirla (lado largo 2200 px, JPEG): se lee bien y ocupa poco. */
+async function comprimirImagen(file, max = 2200, q = 0.82) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('No se pudo leer la foto')); i.src = url; });
+    const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const cv = document.createElement('canvas'); cv.width = Math.round(img.naturalWidth * k); cv.height = Math.round(img.naturalHeight * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    return await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error('No se pudo procesar la foto')), 'image/jpeg', q));
+  } finally { URL.revokeObjectURL(url); }
 }
 /* Tiempo real: lo que añade o marca el otro aparece al momento. */
 function onCompraCambio(p) {
@@ -1955,6 +2249,68 @@ function onCompraCambio(p) {
   clearTimeout(onCompraCambio._t);
   onCompraCambio._t = setTimeout(() => { if (state.tab === 'compra' && $('#modal').hidden) loadCompra(true); }, 250);
 }
+
+
+/* ---------- Préstamos pendientes de cobrar ---------- */
+function openDeudores() {
+  const v = state.listView, c = comun(), mias = new Set(misCuentas().map(x => x.id));
+  const inView = id => v === 'comun' ? !!c && id === c.id : mias.has(id);
+  const ds = state.deud.filter(d => inView(d.cuenta_id) && d.pendiente > 0.004).sort((a, b) => a.nombre.localeCompare(b.nombre) || a.fecha.localeCompare(b.fecha));
+  state.modalCtx = { kind: 'deud' };
+  openModal(`
+    <div class="mh">Préstamos por cobrar</div>
+    <p class="mp">Cuando te paguen, regístralo aquí. Si alguien no te lo va a devolver, dalo por perdido y pasará a ser gasto tuyo.</p>
+    <div style="margin-top:10px">${ds.map(d => `<div class="drow">
+      <div class="rowx"><span class="t">${esc(d.nombre)}</span><span class="amt">${money(d.pendiente)}</span></div>
+      <div class="s">${esc(d.descripcion)} · ${esc(fechaCorta(d.fecha))}${d.cobrado > 0 ? ` · ya te ha devuelto ${money(d.cobrado)} de ${money(d.importe)}` : ''}</div>
+      <div class="apacts"><button class="ghost" data-m="perdonarOpen" data-id="${d.id}">Dar por perdido</button><button class="small" data-m="cobrarOpen" data-id="${d.id}">Me ha pagado</button></div>
+    </div>`).join('') || '<div class="empty">No te deben nada.</div>'}</div>
+    <div class="mbtns"><button class="ghost" data-m="close">Cerrar</button></div>`);
+}
+function openCobrar(d) {
+  state.modalCtx = { kind: 'cobrar', d };
+  openModal(`
+    <div class="mh">${esc(d.nombre)} te ha pagado</div>
+    <p class="mp">${esc(d.descripcion)} · te debe <b>${money(d.pendiente)}</b>.</p>
+    <label class="fl" for="mImporte">Importe</label>
+    <div class="inp"><input class="field" id="mImporte" inputmode="decimal" value="${esc(fmtInput(d.pendiente))}"><i>€</i></div>
+    <label class="fl">¿A qué cuenta te llegó?</label>
+    <div class="seg" id="fCta">${visibles().map(x => `<button data-id="${x.id}" class="${x.id === d.cuenta_id ? 'on' : ''}">${esc(nombreCuenta(x))}</button>`).join('')}</div>
+    <div class="row2">
+      <div><label class="fl" for="mFecha">Fecha</label><input class="field" type="date" id="mFecha" value="${today()}"></div>
+      <div><label class="fl" for="mNota">Nota</label><input class="field" id="mNota" placeholder="Bizum" maxlength="80"></div>
+    </div>
+    <div class="mbtns"><button class="primary" data-m="cobrarOk">Registrar</button><button class="ghost" data-m="deudBack">Volver</button></div>`);
+  state.modalCtx.cuenta = visibles().some(x => x.id === d.cuenta_id) ? d.cuenta_id : visibles()[0]?.id;
+  $('#fCta').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.modalCtx.cuenta = b.dataset.id; $$('#fCta button').forEach(x => x.classList.toggle('on', x === b)); });
+}
+function openPerdonar(d) {
+  state.modalCtx = { kind: 'perdonar', d };
+  const regalos = state.cat.categorias.find(c => c.nombre === 'Regalos')?.id;
+  openModal(`
+    <div class="mh">Dar por perdido</div>
+    <p class="mp">Los <b>${money(d.pendiente)}</b> que te debe ${esc(d.nombre)} por «${esc(d.descripcion)}» pasarán a contar como gasto tuyo. Queda registrado y no se puede deshacer.</p>
+    <label class="fl" for="fCat">Categoría del gasto</label>
+    <select class="field" id="fCat">${state.cat.categorias.filter(c => c.tipo === 'gasto').map(c => `<option value="${c.id}" ${c.id === regalos ? 'selected' : ''}>${esc(c.icono)} ${esc(c.nombre)}</option>`).join('')}</select>
+    <div class="mbtns"><button class="primary danger-bg" data-m="perdonarOk">Dar por perdido</button><button class="ghost" data-m="deudBack">Volver</button></div>`);
+}
+Object.assign(MODAL, {
+  cobrarOpen(b) { const d = state.deud.find(x => x.id === b.dataset.id); if (d) openCobrar(d); },
+  perdonarOpen(b) { const d = state.deud.find(x => x.id === b.dataset.id); if (d) openPerdonar(d); },
+  deudBack() { openDeudores(); },
+  async cobrarOk(b, ctx) {
+    const imp = amountOf($('#mImporte')); if (!imp) return toast('Escribe el importe', 'err');
+    if (imp > ctx.d.pendiente + 0.004) return toast(`Te debe como mucho ${money(ctx.d.pendiente)}`, 'err');
+    b.disabled = true;
+    try { await api.registrarDevolucion(ctx.d.id, round2(imp), ctx.cuenta, $('#mFecha').value || today(), $('#mNota').value.trim()); closeModal(); toast(`Registrado · ${ctx.d.nombre} te ha devuelto ${money(imp)}`); loadList(); }
+    catch (e) { toast(e.message, 'err'); b.disabled = false; }
+  },
+  async perdonarOk(b, ctx) {
+    b.disabled = true;
+    try { await api.darPorPerdido(ctx.d.id, $('#fCat').value); closeModal(); toast('Dado por perdido'); loadList(); }
+    catch (e) { toast(e.message, 'err'); b.disabled = false; }
+  },
+});
 
 /* ===================== Vista MOVIMIENTOS ===================== */
 function mesLabel(s) { const t = new Date(s + 'T12:00:00').toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }); return t.charAt(0).toUpperCase() + t.slice(1); }
@@ -1970,7 +2326,8 @@ async function loadList() {
   $('#lista').innerHTML = '<div class="empty">Cargando…</div>';
   try {
     const desde = state.mes, hasta = addMonths(state.mes, 1);
-    const [movs, trs, bal] = await Promise.all([api.listMovs(desde, hasta), api.listTrs(desde, hasta), api.balance(), refreshLiqs()]);
+    const [movs, trs, bal, deud] = await Promise.all([api.listMovs(desde, hasta), api.listTrs(desde, hasta), api.balance(), api.deudores().catch(() => []), refreshLiqs()]);
+    state.deud = deud.map(d => ({ ...d, importe: +d.importe, cobrado: +d.cobrado, pendiente: +d.pendiente, perdonado: +(d.perdonado || 0) }));
     const vis = new Set(visibles().map(c => c.id));
     state.movs = movs.map(m => ({ ...m, importe: +m.importe, pct_pagador: +m.pct_pagador }))
       .filter(m => vis.has(m.cuenta_id) || (!m.cuenta_id && m.pagado_por === me().id));
@@ -2018,13 +2375,24 @@ function renderList() {
     bx.hidden = false;
   } else bx.hidden = true;
 
+  const deud = state.deud.filter(d => inView(d.cuenta_id) && d.pendiente > 0.004);
+  const pc = $('#prestCard');
+  if (deud.length) {
+    const tot = deud.reduce((s, d) => s + d.pendiente, 0);
+    const porPersona = {};
+    deud.forEach(d => porPersona[d.nombre] = (porPersona[d.nombre] || 0) + d.pendiente);
+    pc.innerHTML = `<span class="bdot">🤲</span><div class="bmain"><div class="big">Te deben ${money(tot)} de préstamos</div>
+      <div class="sm">${Object.entries(porPersona).map(([n, v]) => `${esc(n)} ${money(v)}`).join(' · ')}</div></div><button class="small" data-prest="ver">Ver</button>`;
+    pc.hidden = false;
+  } else pc.hidden = true;
+
   const items = [...allMovs.map(m => ({ ...m, k: 'm' })), ...allTrs.map(t => ({ ...t, k: 't' }))];
   if (!items.length) { $('#lista').innerHTML = `<div class="empty">Sin movimientos en ${v === 'comun' ? 'la cuenta común' : 'tu cuenta'} este mes.</div>`; return; }
   const byDay = {};
   items.forEach(m => (byDay[m.fecha] ||= []).push(m));
   $('#lista').innerHTML = Object.keys(byDay).sort().reverse().map(d => {
     const list = byDay[d].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
-    const tot = list.filter(m => !m.anulado).reduce((s, m) => s + (m.k === 't' ? m.dir * m.importe : m.tipo === 'gasto' ? -m.importe : m.importe), 0);
+    const tot = list.filter(m => !m.anulado).reduce((s, m) => s + (m.k === 't' ? m.dir * m.importe : ['ingreso', 'devolucion'].includes(m.tipo) ? m.importe : -m.importe), 0);
     return `<div class="day"><span>${esc(dayLabel(d))}</span><span>${money(tot)}</span></div>
       <div class="items">${list.map(itemHTML).join('')}</div>`;
   }).join('');
@@ -2040,6 +2408,14 @@ function itemHTML(m) {
     sub = m.dir > 0 ? `Desde ${nombreCuenta(de)} · ${nombreCorto(miembro(m.miembro_id))}` : `A ${nombreCuenta(a).toLowerCase()} · ${nombreCorto(miembro(m.miembro_id))}`;
     badge = `<span class="badge">${pago ? 'Pago de deuda' : 'Aportación'}</span>`;
     amt = `<span class="amt ${m.dir > 0 ? 'ingreso' : ''}">${m.dir > 0 ? '+' : '−'}${money(m.importe)}</span>`;
+  } else if (m.tipo === 'adelanto' || m.tipo === 'devolucion') {
+    const ad = m.tipo === 'adelanto', perd = m.tipo === 'devolucion' && m.origen === 'auto';
+    const ds = state.deud.filter(d => d.adelanto_id === m.adelanto_id);
+    ic = ad ? '🤲' : perd ? '🫶' : '↩️'; color = '#9A6700';
+    title = ad ? m.descripcion : m.descripcion || 'Devolución';
+    sub = ad ? `${nombreCuenta(cuenta(m.cuenta_id))}${ds.length ? ' · ' + ds.map(d => d.nombre).join(', ') : ''}` : `${nombreCuenta(cuenta(m.cuenta_id))}${m.notas ? ' · ' + m.notas : ''}`;
+    badge = `<span class="badge warn">${ad ? 'Préstamo' : perd ? 'Perdonado' : 'Devolución'}</span>`;
+    amt = `<span class="amt ${ad ? '' : 'ingreso'}">${ad ? '−' : '+'}${money(m.importe)}</span>`;
   } else {
     const c = categoria(m.categoria_id) || { nombre: 'Sin categoría', icono: '❔', color: '#999' };
     ic = c.icono; color = c.color; title = m.descripcion || c.nombre;
@@ -2069,6 +2445,7 @@ function bindList() {
     const b = e.target.closest('button'); if (!b) return;
     state.listView = b.dataset.v; lsSet('fin_list', b.dataset.v); state.openId = null; renderList();
   });
+  $('#prestCard').addEventListener('click', e => { if (e.target.closest('[data-prest]')) openDeudores(); });
   $('#balance').addEventListener('click', e => {
     const b = e.target.closest('[data-bal]'); if (!b) return;
     const s = +(state.bal.find(x => x.miembro_id === me().id)?.saldo || 0);
@@ -2101,7 +2478,7 @@ function bindGeneral() {
   });
 }
 
-bindGeneral(); bindLogin(); bindAdd(); bindCompra(); bindAp(); bindPlan(); bindList(); bindModal();
+bindGeneral(); bindLogin(); bindAdd(); bindPrest(); bindCompra(); bindAp(); bindPlan(); bindList(); bindModal();
 boot();
 </script>
 </body>
