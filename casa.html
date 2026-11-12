@@ -323,6 +323,20 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
 .quien{display:flex;gap:14px;font-size:13px;color:var(--muted)}
 .quien span{display:inline-flex;align-items:center;gap:6px}
 .quien i{width:9px;height:9px;border-radius:50%}
+.rsum{display:flex;gap:6px;margin:4px 0 2px;flex-wrap:wrap}
+.rsum button{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-weight:700;font-size:13px;color:var(--muted)}
+.rsum button.on{color:var(--ink);border-color:var(--ink)}
+.rsum i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+.rsum b{font-weight:800}
+.rbar{width:4px;align-self:stretch;margin:8px 0;border-radius:4px;background:var(--c);flex:none}
+.ci.rec .chk{border-color:var(--c)}
+.ci.rec.done .chk{background:var(--c);border-color:var(--c)}
+.ci.rec .cn{font-size:16px;font-weight:700;word-break:break-word}
+.ci.rec.saliendo{opacity:0;transform:translateX(24px);transition:opacity .25s,transform .25s}
+details.contados summary{list-style:none;cursor:pointer}
+details.contados summary::-webkit-details-marker{display:none}
+details.contados summary::after{content:' ▾'}
+details.contados[open] summary::after{content:' ▴'}
 .tini{width:26px;height:26px;flex:none;border-radius:50%;background:var(--c);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
 .mday{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:12px 14px;margin-top:10px}
 .mday.hoy{outline:2px solid var(--accent);outline-offset:-2px}
@@ -414,6 +428,16 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     <div id="tList"></div>
   </section>
 
+  <!-- RECORDAR -->
+  <section id="view-recordar" hidden>
+    <div class="addrow">
+      <input class="field" id="rInput" placeholder="Recordar…" autocomplete="off" autocapitalize="sentences" enterkeyhint="send" maxlength="200">
+      <button class="addgo" id="rAdd" aria-label="Apuntar">+</button>
+    </div>
+    <div class="rsum" id="rFiltro"></div>
+    <div id="rList"></div>
+  </section>
+
   <!-- MENÚ -->
   <section id="view-menu" hidden>
     <div class="monthnav">
@@ -437,6 +461,9 @@ select.field{appearance:none;background-image:linear-gradient(45deg,transparent 
     </button>
     <button data-tab="tareas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3 6 1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/></svg>Tareas
+    </button>
+    <button data-tab="recordar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20l1.2-4.2A8 8 0 0 1 3 11.5 8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5z"/><path d="M12 7.5v4.5M12 15.5h.01"/></svg>Recordar
     </button>
     <button data-tab="menu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v8a3 3 0 0 0 3 3v7M7 3v7M10 3v8a3 3 0 0 1-3 3"/><path d="M17 21V3c-2.2 1-3.5 3.5-3.5 7s1.3 4 3.5 4"/></svg>Menú
@@ -554,6 +581,14 @@ function demoApi() {
     { id: 'mn5', fecha: addDays(lun, 5), momento: 'comida', plato: 'Paella', faltan: [], en_compra: false },
   ];
   const compra = [{ nombre: 'Limón' }];
+  const hace = (d, h = 0) => new Date(Date.now() - d * 864e5 - h * 36e5).toISOString();
+  let recordares = [
+    { id: 'rc1', texto: 'Lo de Marta', autor: 'm2', created_at: hace(0, 2), contado_at: null },
+    { id: 'rc2', texto: 'Peli que me recomendaron', autor: 'm1', created_at: hace(1), contado_at: null },
+    { id: 'rc3', texto: 'Fianza del piso', autor: 'm1', created_at: hace(2), contado_at: null },
+    { id: 'rc4', texto: 'Reunión con el jefe', autor: 'm2', created_at: hace(3), contado_at: null },
+    { id: 'rc5', texto: 'Cumple de Ane', autor: 'm1', created_at: hace(5), contado_at: hace(4), contado_por: 'm2' },
+  ];
   return {
     mode: 'demo', onAuth() {}, async signOut() {},
     async catalog() { return { hogar: { nombre: 'Casa · demo' }, me: miembros[0], email: 'modo demo', miembros }; },
@@ -573,6 +608,11 @@ function demoApi() {
     async compraPendiente() { return compra.map(c => ({ ...c })); },
     async addCompra(items) { compra.push(...items); },
     async menuEnCompra(ids) { menu.forEach(m => { if (ids.includes(m.id)) m.en_compra = true; }); },
+    async recordares() { return recordares.map(r => ({ ...r })); },
+    async addRecordar(texto) { recordares.push({ id: nid('rc'), texto, autor: 'm1', created_at: new Date().toISOString(), contado_at: null }); },
+    async editRecordar(id, texto) { recordares.find(r => r.id === id).texto = texto; },
+    async contado(id, si) { const r = recordares.find(x => x.id === id); r.contado_at = si ? new Date().toISOString() : null; r.contado_por = si ? 'm1' : null; },
+    async deleteRecordar(id) { recordares = recordares.filter(r => r.id !== id); },
     subscribe() {},
   };
 }
@@ -624,9 +664,17 @@ function supaApi() {
     async compraPendiente() { return ok(await sb.from('compra_items').select('nombre').eq('hogar_id', hogarId).neq('estado', 'comprado')); },
     async addCompra(items) { ok(await sb.from('compra_items').insert(items.map(i => ({ ...i, hogar_id: hogarId, estado: 'pendiente', anadido_por: meId })))); },
     async menuEnCompra(ids) { if (ids.length) ok(await sb.from('menu_semanal').update({ en_compra: true }).in('id', ids)); },
+    async recordares() {
+      const desde = new Date(Date.now() - 30 * 864e5).toISOString();   // pendientes + contados del último mes
+      return ok(await sb.from('recordares').select('*').eq('hogar_id', hogarId).or(`contado_at.is.null,contado_at.gte.${desde}`).order('created_at', { ascending: false }));
+    },
+    async addRecordar(texto) { ok(await sb.from('recordares').insert({ hogar_id: hogarId, texto, autor: meId })); },
+    async editRecordar(id, texto) { ok(await sb.from('recordares').update({ texto }).eq('id', id)); },
+    async contado(id, si) { ok(await sb.from('recordares').update(si ? { contado_at: new Date().toISOString(), contado_por: meId } : { contado_at: null, contado_por: null }).eq('id', id)); },
+    async deleteRecordar(id) { ok(await sb.from('recordares').delete().eq('id', id)); },
     subscribe(cb) {
       const ch = sb.channel('casa-' + hogarId);
-      ['eventos', 'tareas', 'tarea_hechas', 'menu_semanal'].forEach(t =>
+      ['eventos', 'tareas', 'tarea_hechas', 'menu_semanal', 'recordares'].forEach(t =>
         ch.on('postgres_changes', { event: '*', schema: 'public', table: t, filter: `hogar_id=eq.${hogarId}` }, p => cb(t, p)));
       ch.subscribe();
     },
@@ -640,9 +688,10 @@ const state = {
   eventos: [], recs: [], calMes: monthStart(today()), calSel: today(), calHide: new Set(JSON.parse(lsGet('casa_hide') || '[]')),
   semana: lunes(today()), tareas: [], hechas: [],
   menuSem: lunes(today()), menu: [], compraPend: [], modalCtx: null,
+  recordar: [], rFiltro: lsGet('casa_rfiltro') || 'todos',
 };
-if (!['cal', 'tareas', 'menu'].includes(state.tab)) state.tab = 'cal';
-const TITLES = { cal: 'Calendario', tareas: 'Tareas de la semana', menu: 'Menú semanal' };
+if (!['cal', 'tareas', 'recordar', 'menu'].includes(state.tab)) state.tab = 'cal';
+const TITLES = { cal: 'Calendario', tareas: 'Tareas de la semana', recordar: 'Para contarnos', menu: 'Menú semanal' };
 const me = () => state.cat.me;
 const miembro = id => state.cat.miembros.find(m => m.id === id);
 const otro = () => state.cat.miembros.find(m => m.id !== me().id);
@@ -674,7 +723,7 @@ async function boot() {
   api.onAuth(s => { if (s) start(); else showLogin(); });
 }
 function hideAll() {
-  ['login', 'msg', 'cal', 'tareas', 'menu'].forEach(v => $('#view-' + v).hidden = true);
+  ['login', 'msg', 'cal', 'tareas', 'recordar', 'menu'].forEach(v => $('#view-' + v).hidden = true);
   $('#fab').hidden = true; $('#menuBar').hidden = true; document.body.dataset.bar = '0';
 }
 function showLogin() {
@@ -725,6 +774,7 @@ async function start() {
   $('#who').hidden = false; $('#tabs').hidden = false;
   try { api.subscribe(onCambio); } catch {}
   go(state.tab);
+  if (state.tab !== 'recordar') loadRecordar(true);
 }
 function go(tab) {
   state.tab = tab; lsSet('casa_tab', tab); hideAll(); closeModal();
@@ -735,16 +785,18 @@ function go(tab) {
   if (tab === 'cal') loadCal();
   if (tab === 'tareas') loadTareas();
   if (tab === 'menu') loadMenu();
+  if (tab === 'recordar') loadRecordar();
   window.scrollTo(0, 0);
 }
 /* Tiempo real: lo que cambia el otro aparece solo. */
 function onCambio(tabla) {
   clearTimeout(onCambio._t);
   onCambio._t = setTimeout(() => {
-    if (!$('#modal').hidden) return;
+    if (!$('#modal').hidden && !(tabla === 'recordares' && state.tab !== 'recordar')) return;
     if (state.tab === 'cal' && tabla === 'eventos') loadCal();
     if (state.tab === 'tareas' && (tabla === 'tareas' || tabla === 'tarea_hechas')) loadTareas();
     if (state.tab === 'menu' && tabla === 'menu_semanal') loadMenu();
+    if (tabla === 'recordares') loadRecordar(state.tab !== 'recordar');
   }, 250);
 }
 
@@ -959,6 +1011,93 @@ function bindTareas() {
   });
 }
 
+/* ===================== RECORDAR ===================== */
+/* Lo que antes os escribíais por WhatsApp ("recordar: lo de Marta") para contároslo al veros. */
+const cuando = iso => {
+  const d = new Date(iso), hoy = today(), dia = isoDate(d), h = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  if (dia === hoy) return 'hoy, ' + h;
+  if (dia === addDays(hoy, -1)) return 'ayer';
+  const n = Math.round((dt(hoy) - dt(dia)) / 864e5);
+  return n < 7 ? `hace ${n} días` : diaMes(dia);
+};
+const vistoKey = () => 'casa_rvisto_' + (state.cat?.me?.id || '');
+/* Punto en la pestaña si el otro ha apuntado algo desde la última vez que la abriste. */
+function badgeRecordar() {
+  const visto = lsGet(vistoKey()) || '', btn = $('#tabs [data-tab="recordar"]'); if (!btn) return;
+  const nuevo = state.tab !== 'recordar' && state.recordar.some(r => !r.contado_at && r.autor !== me().id && r.created_at > visto);
+  let dot = btn.querySelector('.dot');
+  if (nuevo && !dot) { dot = document.createElement('span'); dot.className = 'dot'; btn.appendChild(dot); }
+  if (!nuevo && dot) dot.remove();
+}
+async function loadRecordar(soloBadge = false) {
+  try { state.recordar = await api.recordares(); } catch (e) { if (!soloBadge) toast(e.message, 'err'); }
+  if (!soloBadge && state.tab === 'recordar') { lsSet(vistoKey(), new Date().toISOString()); renderRecordar(); }
+  badgeRecordar();
+}
+function renderRecordar() {
+  const pend = state.recordar.filter(r => !r.contado_at).sort((a, b) => b.created_at.localeCompare(a.created_at)), hechos = state.recordar.filter(r => r.contado_at)
+    .sort((a, b) => b.contado_at.localeCompare(a.contado_at));
+  const filtros = [['todos', 'Todos', null, pend.length], ...miembrosOrd().map(m => [m.id, m.id === me().id ? 'Míos' : `De ${m.nombre}`, colorMiembro(m), pend.filter(r => r.autor === m.id).length])];
+  if (!filtros.some(f => f[0] === state.rFiltro)) state.rFiltro = 'todos';
+  $('#rFiltro').innerHTML = pend.length ? filtros.map(([k, n, c, cnt]) => `<button data-rf="${esc(k)}" class="${state.rFiltro === k ? 'on' : ''}" ${c ? `style="--c:${c}"` : ''}>${c ? '<i></i>' : ''}${esc(n)} <b>${cnt}</b></button>`).join('') : '';
+  const lista = state.rFiltro === 'todos' ? pend : pend.filter(r => r.autor === state.rFiltro);
+  const row = r => {
+    const a = miembro(r.autor), c = colorMiembro(a), quien = !a ? '—' : a.id === me().id ? 'Tú' : a.nombre;
+    const pie = r.contado_at ? `Contado ${cuando(r.contado_at)} · lo apuntó ${esc(quien === 'Tú' ? 'tú' : quien)}` : `${esc(quien)} · ${cuando(r.created_at)}`;
+    return `<div class="ci rec ${r.contado_at ? 'done' : ''}" style="--c:${c}" data-rid="${r.id}">
+      <button class="chk" data-rchk="${r.id}" aria-label="${r.contado_at ? 'Volver a pendientes' : 'Ya nos lo hemos contado'}">${r.contado_at ? '✓' : ''}</button>
+      <button class="cmain" data-redit="${r.id}"><span class="cn">${esc(r.texto)}</span><span class="cnota">${pie}</span></button></div>`;
+  };
+  let html = '';
+  if (lista.length) html += `<div class="items mt">${lista.map(row).join('')}</div><p class="hint" style="text-align:center;margin-top:10px">Toca el círculo cuando ya os lo hayáis contado.</p>`;
+  else if (pend.length) html += '<div class="empty">Nada pendiente en este filtro.</div>';
+  else html += '<div class="empty">Nada pendiente de contaros 💬<br><span style="font-size:13px">Apunta aquí lo que quieras contarle cuando os veáis: una palabra basta.</span></div>';
+  if (hechos.length) html += `<details class="contados"><summary class="sec">Ya contados · ${hechos.length}</summary><div class="items">${hechos.map(row).join('')}</div></details>`;
+  const abierto = $('#rList details')?.open;
+  $('#rList').innerHTML = html;
+  if (abierto && $('#rList details')) $('#rList details').open = true;
+}
+async function toggleContado(id) {
+  const r = state.recordar.find(x => x.id === id); if (!r) return;
+  const si = !r.contado_at, el = $(`#rList [data-rid="${id}"]`);
+  if (si && el) { el.classList.add('saliendo'); await new Promise(res => setTimeout(res, 230)); }
+  r.contado_at = si ? new Date().toISOString() : null; r.contado_por = si ? me().id : null;
+  renderRecordar();
+  if (!si) toast('Vuelve a pendientes');
+  try { await api.contado(id, si); } catch (e) { toast(e.message, 'err'); loadRecordar(); }
+}
+function openRecordar(r) {
+  state.modalCtx = { kind: 'recordar', r };
+  const a = miembro(r.autor);
+  openModal(`
+    <div class="mh">Recordar</div>
+    <label class="fl" for="fRec">Qué</label>
+    <input class="field" id="fRec" value="${esc(r.texto)}" maxlength="200">
+    <p class="mp" style="font-size:12.5px">Lo apuntó ${esc(!a ? '—' : a.id === me().id ? 'tú' : a.nombre)} ${esc(cuando(r.created_at))}.</p>
+    <div class="mbtns">
+      <button class="primary" data-mx="rSave">Guardar</button>
+      <button class="ghost dangertxt" data-mx="rDel">Borrar</button>
+      <button class="ghost" data-mx="close">Cancelar</button>
+    </div>`);
+}
+function bindRecordar() {
+  const add = async () => {
+    const v = $('#rInput').value.trim(); if (!v) return;
+    $('#rInput').value = ''; $('#rInput').focus();
+    const tmp = { id: 'tmp' + Date.now(), texto: cap1(v), autor: me().id, created_at: new Date().toISOString(), contado_at: null };
+    state.recordar.unshift(tmp); renderRecordar();
+    try { await api.addRecordar(tmp.texto); loadRecordar(); } catch (e) { toast(e.message, 'err'); loadRecordar(); }
+  };
+  $('#rAdd').addEventListener('click', add);
+  $('#rInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); add(); } });
+  $('#rFiltro').addEventListener('click', e => { const b = e.target.closest('[data-rf]'); if (!b) return; state.rFiltro = b.dataset.rf; lsSet('casa_rfiltro', state.rFiltro); renderRecordar(); });
+  $('#rList').addEventListener('click', e => {
+    const c = e.target.closest('[data-rchk]'), ed = e.target.closest('[data-redit]');
+    if (c) toggleContado(c.dataset.rchk);
+    if (ed) openRecordar(state.recordar.find(r => r.id === ed.dataset.redit));
+  });
+}
+
 /* ===================== MENÚ SEMANAL ===================== */
 async function loadMenu() {
   try {
@@ -1055,6 +1194,12 @@ const MODAL = {
       closeModal(); loadMenu();
     } catch (e) { toast(e.message, 'err'); b.disabled = false; }
   },
+  async rSave(b, ctx) {
+    const v = $('#fRec').value.trim(); if (!v) return toast('Escribe algo', 'err');
+    b.disabled = true;
+    try { await api.editRecordar(ctx.r.id, v); closeModal(); loadRecordar(); } catch (e) { toast(e.message, 'err'); b.disabled = false; }
+  },
+  async rDel(b, ctx) { b.disabled = true; try { await api.deleteRecordar(ctx.r.id); closeModal(); toast('Borrado'); loadRecordar(); } catch (e) { toast(e.message, 'err'); b.disabled = false; } },
   async slotDel(b, ctx) { b.disabled = true; try { await api.deleteSlot(ctx.s.id); closeModal(); loadMenu(); } catch (e) { toast(e.message, 'err'); b.disabled = false; } },
 };
 
@@ -1071,7 +1216,7 @@ function bindGeneral() {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && state.started && $('#modal').hidden) go(state.tab); });
 }
 
-bindGeneral(); bindLogin(); bindCal(); bindTareas(); bindMenu();
+bindGeneral(); bindLogin(); bindCal(); bindTareas(); bindRecordar(); bindMenu();
 boot();
 </script>
 </body>
